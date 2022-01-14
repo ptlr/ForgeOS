@@ -16,30 +16,30 @@ boot_start:
     mov ah, 0x03
 
     mov al, 'H'
-    mov gs:[0], ax
+    mov [gs:0], ax
 
     mov al, 'e'
-    mov gs:[2], ax
+    mov [gs:2], ax
 
     mov al, 'l'
-    mov gs:[4], ax
+    mov [gs:4], ax
 
-    mov gs:[6], ax
+    mov [gs:6], ax
 
     mov al, 'o'
-    mov gs:[8],ax
+    mov [gs:8],ax
 
     mov al, ' '
-    mov gs:[10], ax
+    mov [gs:10], ax
 
     mov al,'O'
-    mov gs:[12], ax
+    mov [gs:12], ax
 
     mov al, 'S'
-    mov gs:[14], ax
+    mov [gs:14], ax
 
     mov al, '!'
-    mov gs:[16], ax
+    mov [gs:16], ax
     jmp $
 times 510-($-$$) db 0
 dw 0xAA55
