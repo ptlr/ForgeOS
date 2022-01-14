@@ -2,8 +2,8 @@
 
 ## 一、目标
 
-* [ ] 搭建开发环境
-* [ ] 运行测试程序
+* [x] 搭建开发环境
+* [x] 运行测试程序
 
 
 
@@ -19,7 +19,8 @@
 > > ### 2、安装gcc、g++
 > >
 > > ```bash
-> > sudo apt install gcc g++ -y
+> > sudo apt install gcc -y
+> > sudo apt install g++ -y
 > > ```
 > >
 > > ### 3、安装make
@@ -109,7 +110,7 @@
 
 ----
 
->* [ ] 运行测试
+>* [x] 运行测试
 >
 >   > （1）测试代码
 >   >
@@ -164,24 +165,23 @@
 >   > （2）编译测试代码
 >   >
 >   > ```bash
->   > 
 >   > nasm demo.asm -o demo.bin
 >   > ```
->   >
->   > （3）准备镜像
->   >
->   > ```
+>   > 
+>   >（3）准备镜像
+>   > 
+>   >```
 >   > # 创建1.44MB空白软盘，命名为demo.img
 >   > dd if=/dev/zero of=demo.img bs=512 count=2880
 >   > # 写入二进制文件
 >   > dd if=demo.bin of=demo.img bs=512 count=1 conv=notrunc
 >   > ```
->   >
 >   > 
 >   >
->   > （4）bochs脚本
->   >
->   > ```bochsrc
+>   > 
+>   >（4）bochs脚本
+>   > 
+>   >```bochsrc
 >   > # ‘#’后面的内容为注释内容
 >   > # 设置bochs在运行过程中使用的内存
 >   > memory: host=32, guest=32
@@ -202,18 +202,18 @@
 >   > # 日志输出文件
 >   > log: demo.log
 >   > ```
->   >
->   > （5）运行测试
->   >
->   > ```bash
+>   > 
+>   >（5）运行测试
+>   > 
+>   >```bash
 >   > bochs -f bochrs
 >   > ```
->   >
->   > 启动后，没有出错则会显示确认界面,默认选项为6,对应的内容是`6. Begin simulation`，此时按<kbd>Enter</kbd>进入模拟器。
->   >
->   > 可以使用`bochs -q -f bochsrc`跳过确认界面。
->   >
->   > 进入模拟器后，输入命令`c`，而后按下<kbd>Enter</kbd>,此时会显示蓝色的“Hello OS!”,如图：
->   >
->   > ![运行结果](img/DemoSuccess.png)
+>   > 
+>   >启动后，没有出错则会显示确认界面,默认选项为6,对应的内容是`6. Begin simulation`，此时按<kbd>Enter</kbd>进入模拟器。
+>   > 
+>   >可以使用`bochs -q -f bochsrc`跳过确认界面。
+>   > 
+>   >进入模拟器后，输入命令`c`，而后按下<kbd>Enter</kbd>,此时会显示蓝色的“Hello OS!”,如图：
+>   > 
+>   >![运行结果](img/DemoSuccess.png)
 
