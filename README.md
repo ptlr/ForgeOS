@@ -46,7 +46,7 @@
 * DayXX_XXX 开发过程相关的目录
 * [docs](./docs) 通用的文档
 * [Tools](./Tools) 工具目录
-* [README.md](./README.md)仓库说明
+* [README.md](./README.md) 仓库说明
 
 ## 三、参考资料
 
