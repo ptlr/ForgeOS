@@ -24,6 +24,7 @@ dmem:
     mov di, MME_OFF
     mov ebx, 0
 .dmem_loop:
+    mov dword [es:di + 20], 1
     mov eax, 0xE820
     mov ecx, 24
     ;错误警告：
