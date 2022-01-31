@@ -18,6 +18,7 @@ loader_start:
 dmem:
     mov ax, 0
     mov ds, ax
+    ; ds:MME_CNT
     mov dword [MME_CNT], 0
     mov ax, MME_SEG
     mov es, ax
@@ -29,6 +30,7 @@ dmem:
     mov ecx, 24
     ;错误警告：
     ;不要把0x534D4150写成'SMAP'，编译后顺序会被改变，导致CF置位报错，还是老老实实写成16进制形式
+    ;错误用法：mov edx, 'SMAP'
     mov edx, 0x534D4150
     int 0x15
     jc .dmem_err
@@ -38,6 +40,9 @@ dmem:
     add di, 24
     jmp .dmem_loop
 .dmem_err:
+    mov bx, cs
+    mov ds, bx
+
     mov ah, 0_000__0_100B   ; 红色
     mov al, 2
     mov si, MSG_DMEM_ERR
