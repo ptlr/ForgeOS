@@ -3,7 +3,9 @@
 jmp loader_start
 ; GDT
 DESC:       dq 0x00_0_0_00_000000_0000
+; 数据段，0~4GB， 可读写
 DESC_DATA:  dq 0x00_C_F_93_000000_FFFF
+; 代码段， 0~4GB, 执行，读，已访问
 DESC_CODE:  dq 0x00_C_F_9A_000000_FFFF
 GDT_SIZE    equ $ - DESC
 
