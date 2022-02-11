@@ -27,6 +27,7 @@ Header部分只有一行，包含三个字段：`type`(必须)、`scope`(可选)
 | feat       | 新功能（feature）                             |            |
 | perf       | 性能，体验优化                                |            |
 | fix        | 修补bug                                       |            |
+| comm       | 注释                                          |            |
 | docs       | 文档（documentation）                         |            |
 | style      | 格式修改，不影响代码运行效果                  | 包括路径等 |
 | ref        | 重构代码，即不新增功能，也不修改bug的代码变动 |            |
