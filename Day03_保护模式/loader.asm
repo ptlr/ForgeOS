@@ -1,6 +1,6 @@
 ; loader.asm
 %include "bootloader.inc"
-jmp loader_start
+jmp loaderStart
 ; GDT
 DESC:       dq 0x00_0_0_00_000000_0000
 ; 数据段，0~4GB， 可读写
@@ -18,7 +18,7 @@ GDT_BASE:    dd 0x8600 + DESC
 SELECTOR_DATA EQU 1 << 3 + 0
 SELECTOR_CODE EQU 2 << 3 + 0
 
-loader_start:
+loaderStart:
     ; 初始化段寄存器
     mov ax, cs
     mov ds, ax
@@ -26,14 +26,14 @@ loader_start:
     mov si, MSG_LOADER
     mov ah, 0x03
     mov al, 1
-    call print_rm
+    call rmPrint
 
     mov si, MSG_DMEM
     mov ah, 0x03
     mov al, 2
-    call print_rm
+    call rmPrint
     ; 查询内存信息
-dmem:
+dectMem:
     mov ax, 0
     mov ds, ax
     ; ds:MME_CNT
@@ -42,7 +42,7 @@ dmem:
     mov es, ax
     mov di, MME_OFF
     mov ebx, 0
-.dmem_loop:
+.loop:
     mov dword [es:di + 20], 1
     mov eax, 0xE820
     mov ecx, 24
@@ -51,22 +51,22 @@ dmem:
     ;错误用法：mov edx, 'SMAP'
     mov edx, 0x534D4150
     int 0x15
-    jc .dmem_err
+    jc .err
     inc dword [MME_CNT]
     cmp ebx, 0
-    jz .dmem_end
+    jz .end
     add di, 24
-    jmp .dmem_loop
-.dmem_err:
+    jmp .loop
+.err:
     mov bx, cs
     mov ds, bx
 
     mov ah, 0_000__0_100B   ; 红色
     mov al, 2
     mov si, MSG_DMEM_ERR
-    call print_rm
+    call rmPrint
     jmp $
-.dmem_end:
+.end:
     ; 进入保护模式
     ; 1、打开A20地址线
     in al, 0x92
@@ -112,11 +112,11 @@ hex2char:
     or al, 0100_0000B
 .end:
     ret
-;函数名：print_rm
+;函数名：rmPrint
 ;功能：在是模式下显示以0结尾的字符串
 ;参数：AH=颜色（AL）=行数（0~24）（ds）=字符串的起始位置段地址，（si）=偏移地址
 ;返回：无
-print_rm:
+rmPrint:
     push bx
     push ax
     ; 80 * 2 * 25 = 4000 < 65535, 8位乘法
@@ -124,17 +124,17 @@ print_rm:
     mul bl
     mov bx, ax
     pop ax
-.put_char:
+.putChar:
     mov al, [si]
     cmp al,0
-    jz .end_put
+    jz .endPut
     mov [gs:bx],ax
     inc si
     add bx, 2
-    jmp .put_char
-.end_put:
+    jmp .putChar
+.endPut:
     pop bx
     ret
-MSG_LOADER: db "Loader start",0
-MSG_DMEM:   db "Detect memory info",0
+MSG_LOADER: db "[02] Loader start",0
+MSG_DMEM:   db "[03] Detect memory info",0
 MSG_DMEM_ERR: db "ERROR: int 0x15 not support!",0
