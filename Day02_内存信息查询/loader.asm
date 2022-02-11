@@ -89,6 +89,6 @@ print_rm:
 .end_put:
     pop bx
     ret
-MSG_LOADER: db "Loader start",0
-MSG_DMEM:   db "Detect memory info",0
+MSG_LOADER: db "[02] Loader start",0
+MSG_DMEM:   db "[03] Detect memory info",0
 MSG_DMEM_ERR: db "ERROR: int 0x15 not support!",0

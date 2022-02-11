@@ -79,6 +79,6 @@ print_rm:
 .end_put:
     pop bx
     ret
-MSG_BOOT: db "Boot start",0
+MSG_BOOT: db "[01] Boot start",0
 times 510-($-$$) db 0
 dw 0xAA55
