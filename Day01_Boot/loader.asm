@@ -30,4 +30,4 @@ print_rm:
 .end_put:
     pop bx
     ret
-MSG_LOADER: db "Hello Loader!",0
+MSG_LOADER: db "[02] Hello Loader!",0

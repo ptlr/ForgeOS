@@ -85,6 +85,6 @@ print_rm:
 .end_put:
     pop bx
     ret
-MSG_BOOT: db "Hello ForgeOS!",0
+MSG_BOOT: db "[01] Hello ForgeOS!",0
 times 510-($-$$) db 0
 dw 0xAA55
