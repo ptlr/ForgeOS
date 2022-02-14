@@ -68,6 +68,12 @@ dectMem:
     jmp $
 .end:
     ; 进入保护模式
+    mov ax, cs
+    mov ds, ax
+    mov ah, 0b0_000_0_011 ;蓝色
+    mov al, 3
+    mov si, MSG_PROTECT
+    call rmPrint
     ; 1、打开A20地址线
     in al, 0x92
     or al, 0000_0010B
@@ -135,6 +141,7 @@ rmPrint:
 .endPut:
     pop bx
     ret
-MSG_LOADER: db "[02] Loader start",0
-MSG_DMEM:   db "[03] Detect memory info",0
+MSG_LOADER:     db "[02] Loader start",0
+MSG_DMEM:       db "[03] Detect memory info",0
+MSG_PROTECT:    db "[04] Protect mode",0
 MSG_DMEM_ERR: db "ERROR: int 0x15 not support!",0
