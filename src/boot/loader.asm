@@ -1,5 +1,5 @@
 ; loader.asm
-%include "boot.inc"
+%include "constant.inc"
 jmp loaderStart
 ; GDT
 DESC:       dq 0x00_0_0_00_000000_0000
@@ -15,7 +15,9 @@ GDT_LIMIT:   dw GDT_SIZE - 1
 GDT_BASE:    dd 0x8600 + DESC
 
 ; 段选择子:指向GDT,
+; 数据段选择子
 SELECTOR_DATA EQU 1 << 3 + 0
+; 代码段选择子
 SELECTOR_CODE EQU 2 << 3 + 0
 
 loaderStart:

@@ -1,6 +1,6 @@
 ; boot.asm
 ; 用于测试开发环境的简单代码
-%include "boot.inc"
+%include "constant.inc"
 org 0x7C00
 
 bootStart:
