@@ -1,3 +1,4 @@
+; ！分页模式下可用
 global cPutChar         ; 到处标号供外部使用
 
 [BITS 32]
@@ -8,8 +9,8 @@ global cPutChar         ; 到处标号供外部使用
 cPutChar:
     pushad       ; 入栈顺序是EAX、ECX、EDX、EBX、ESP、EBP、ESI、EDI
     ; 初始化数据位置
-    mov ax, 1 << 3 + 0
-    mov gs, ax
+    ;mov ax, 3 << 3 + 0
+    ;mov gs, ax
     mov ebp, esp
 .getCursor:
     ; 清空，后面需要使用
@@ -54,13 +55,13 @@ cPutChar:
 .backspace:
     dec bx
     shl bx, 1   ; 按位向左移1位，相当于乘2
-    mov word [gs:ebx + 0xB8000], 0x0720   ; 黑底白色空格
+    mov word [gs:ebx], 0x0720   ; 黑底白色空格
     shr bx, 1   ; 向右移1位
     jmp .setCursor
 .normalChar:
     ; 在光标处写入带属性的字符
     shl bx, 1
-    mov [gs:ebx + 0xB8000], ax
+    mov [gs:ebx], ax
     shr bx, 1
     inc bx
     cmp bx, 2000    ; 判断是否在第一页的末尾
@@ -77,14 +78,14 @@ cPutChar:
 .rollScreen:
     cld                 ; 设置自增方向， 每执行一次自增对应的数目，比如movsb时加1， movsw时加2, movs加4
     mov ecx,960         ; 第1~25行共80 * 24 * 2  / 4= 1920 / 2 = 960， 需要移动960次
-    mov esi,0xc00B80A0  ; 第1行的行首   ds:esi指向起始位置
-    mov edi,0xc00B8000  ; 第0行的行首   es:edi指向数据的目的地
+    mov esi,0x00A0  ; 第1行的行首   ds:esi指向起始位置
+    mov edi,0x0000  ; 第0行的行首   es:edi指向数据的目的地
     rep movsd           ; 每次移动4字节
     ;清空最后一行
     mov bx,3840
     mov ecx,80
 .cls:
-    mov word [gs:ebx + 0xB8000], 0x0720    ;黑底白字的空格
+    mov word [gs:ebx], 0x0720    ;黑底白字的空格
     add ebx,2
     loop .cls
     mov bx,1920
