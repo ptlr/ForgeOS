@@ -1,6 +1,6 @@
 ; ！分页模式下可用
 global cPutChar         ; 到处标号供外部使用
-
+SELECTOR_TEXT   EQU 3 << 3 + 0
 [BITS 32]
 [SECTION .text]
 ;函数名：cPutChar
@@ -8,9 +8,13 @@ global cPutChar         ; 到处标号供外部使用
 ;返回：无
 cPutChar:
     pushad       ; 入栈顺序是EAX、ECX、EDX、EBX、ESP、EBP、ESI、EDI
-    ; 初始化数据位置
-    ;mov ax, 3 << 3 + 0
-    ;mov gs, ax
+    push ds
+    push es
+    ; 重新初始化段数据位置
+    mov ax, SELECTOR_TEXT
+    mov gs, ax
+    mov ds, ax
+    mov es, ax
     mov ebp, esp
 .getCursor:
     ; 清空，后面需要使用
@@ -37,9 +41,9 @@ cPutChar:
     ; 调用的时候会压入4字节地址
     ; 保存寄存器环境
     ; 获取颜色
-    mov edx, [ebp + 36]      ; 所有寄存器的值,4*8=32,加上主调函数的返回地址4字节,故esp+36
+    mov edx, [ebp + 44]      ; 所有寄存器的值,4*8=32,加上主调函数的返回地址4字节,加DS,ES故esp+44
     ; 获取字符
-    mov eax, [ebp + 40]      ; 在颜色后压入字符的值
+    mov eax, [ebp + 48]      ; 在颜色后压入字符的值
     mov ah, dl               ; ax中保存带颜色的字符
     cmp al, 0x0A
     jz .newLine
@@ -105,5 +109,7 @@ cPutChar:
     mov al, bl
     out dx, al
 .putEnd:
+    pop es
+    pop ds
     popad
     ret
