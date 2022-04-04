@@ -1,5 +1,5 @@
 #ifndef LIB_IO_H
-#define LIB_IO_H\
+#define LIB_IO_H
 #include "stdint.h"
 /* 向端口写入一个字节 */
 static inline void outb(uint16 port, uint8 data){
