@@ -32,7 +32,7 @@ static void initPic()
     outb(PIC_M_CTRL, 0x11); // ICW1：边缘触发，级联8259，需要ICW4
     outb(PIC_M_DATA, 0x20); // ICW2: 起始中断号为0x20，即IR0~IR7为中断0x20~0x27
 
-    outb(PIC_M_DATA, 0x04); // ICW3: IR2接从片
+    outb(PIC_M_DATA, 0x04); // ICW3: IR2接从片(0b0000_0100)
     outb(PIC_M_DATA, 0x01); // ICW4: 8086模式，正常EOI模式
     /* 初始化从片 */
     outb(PIC_S_CTRL, 0x11); // ICW1: 边缘触发，级联8259，需要ICW4
