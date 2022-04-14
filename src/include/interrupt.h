@@ -21,8 +21,5 @@ struct GateDesc
    uint8 attribute;
    uint16 funcOffsetHighWord; 
 };
-//static void makeIdtDesc(struct GateDesc* gateDesc, uint8 attr, intrHandler function);
-//static void initIdtDesc();
-//static void initPic();
 void initIdt();
 #endif
