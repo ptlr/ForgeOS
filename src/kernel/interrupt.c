@@ -6,7 +6,27 @@ static struct GateDesc IDT[IDT_DESC_CNT];
 /* 这里的intrEntryTable是中断入口地址，中断对应的函数的地址被存放到了这里
  * 每项是32bit的数据
  */
+// 保存中断的名称
+char* intrNames[IDT_DESC_CNT];
+// 中断入口（汇编）
 extern intrHandler intrEntryTable[IDT_DESC_CNT];
+// 中断处理程序（C）
+intrHandler intrHandlerTable[IDT_DESC_CNT];
+// 临时
+int intrCount = 0;
+static void generalIntrHandler(uint8 intrVecNum)
+{
+    if(intrVecNum == 0x27 || intrVecNum == 0x2F)
+    {
+        return;
+    }
+    intrCount++;
+    putStr("Interrupt occur!, VEC_NUM = ");
+    putHex(intrVecNum);
+    putStr(", COUNT = ");
+    putHex(intrCount);
+    cPutChar(0x07,'\n');
+}
 
 static void makeIdtDesc(struct GateDesc* gateDesc, uint8 attr,intrHandler function)
 {
@@ -24,6 +44,32 @@ static void initIdtDesc()
         makeIdtDesc(&IDT[index], IDT_DESC_ATTR_DPL0, intrEntryTable[index]);
     }
     
+}
+static void initException(void){
+    for(int index = 0; index < IDT_DESC_CNT; index++){
+        intrNames[index] = "Reserved";
+        intrHandlerTable[index] = generalIntrHandler;
+    }
+    intrNames[0] = "#DE Divide Error";
+    intrNames[1] = "#DB Debug Exception";
+    intrNames[2] = "NMI Interrupt";
+    intrNames[3] = "#BP Breakpoint Exception";
+    intrNames[4] = "#OF Overflow Exception";
+    intrNames[5] = "#BR BOUND Range Exceeded Exception";
+    intrNames[6] = "#UD Invalid Opcode Exception";
+    intrNames[7] = "#NM Device Not Available Exception";
+    intrNames[8] = "#DF Double Fault Exception";
+    intrNames[9] = "Coprocessor Segment Overrun";
+    intrNames[10] = "#TS Invalid TSS Exception";
+    intrNames[11] = "#NP Segment Not Present";
+    intrNames[12] = "#SS Stack Fault Exception";
+    intrNames[13] = "#GP General Protection Exception";
+    intrNames[14] = "#PF Page-Fault Exception";
+    intrNames[15] = "- (Intel reserved. Do not use)";
+    intrNames[16] = "#MF x87 FPU Floating-Point Error";
+    intrNames[17] = "#AC Alignment Check Exception";
+    intrNames[18] = "#MC Machine-Check Exception";
+    intrNames[19] = "#XF SIMD Floating-Point Exception";
 }
 static void initPic()
 {
@@ -49,6 +95,7 @@ void initIdt()
 {
     putStr("[07] init IDT\n");cPutChar(0x07,'\n');
     initIdtDesc();
+    initException();
     initPic();
     //while (1);
     putHex((uint32)&IDT);cPutChar(0x07,'\n');

@@ -1,6 +1,9 @@
 extern cPutChar
 extern putHex
 extern putStr
+
+extern intrHandlerTable
+
 global intrEntryTable
 %define ERROR_CODE  nop
 %define ERROR_ZERO  push 0
@@ -15,40 +18,41 @@ global intrEntryTable
 [BITS 32]
 intr%1entry:
     %2
-    push INTR_MSG_PRE
-    call putStr
-    add esp, 4              ; 栈平衡，跳过参数
+    ; 保存寄存器环境
+    push ds
+    push es
+    push fs
+    push gs
+    pushad
 
-    push %1
-    call putHex
-    add esp, 4
-
-    push INTR_MSG_COUNT
-    call putStr
-    add esp, 4              ; 栈平衡，跳过参数
-
-    mov eax, [INTR_COUNT]
-    push eax
-    call putHex
-    add esp, 4
-    inc dword [INTR_COUNT]
-
-    push 0x0A
-    push 0x07
-    call cPutChar
-    add esp, 8
     ;向8259A发送EOI信号
     mov al, 0x20
     out 0xA0, al            ; 从片
     out 0x20, al            ; 主片
 
-    add esp, 4              ; 跳过错误码
-    iretd                    ; 根据BITS指令,这里会被编译成iretd(32位模式)
+    ;调用中断处理函数
+    push %1 ; 压入中断号
+    call [intrHandlerTable + %1 * 4]
+    ; 平衡栈空间，跳过中断处理函数的参数
+    add esp, 4
+
+    jmp intrExit
 ; 这里的“.data”部分必须被定义
 ; 这里面保存了中断的入口数据
 [SECTION .data]
     dd intr%1entry
 %endmacro
+[SECTION .text]
+[BITS 32]
+intrExit:
+    popad
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    ; 跳过错误码
+    add esp, 4
+    iretd
 [SECTION .data]
 INTR_COUNT  dd 0
 INTR_MSG_PRE    db "Interrupt occur! INTR=",0

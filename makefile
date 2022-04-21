@@ -26,7 +26,8 @@ DIR_SCRIPTS = ./scripts
 
 OBJ = 	$(DIR_BUILD)/kernel.o $(DIR_BUILD)/print.a.o $(DIR_BUILD)/interrupt.a.o\
 		$(DIR_BUILD)/print.c.o $(DIR_BUILD)/main.o $(DIR_BUILD)/interrupt.c.o\
-		$(DIR_BUILD)/init.o 
+		$(DIR_BUILD)/init.o $(DIR_BUILD)/timer.o
+
 BIN = $(DIR_BUILD)/boot.bin $(DIR_BUILD)/loader.bin $(DIR_BUILD)/kernel.bin
 
 .PHONY: all run clean
@@ -65,6 +66,8 @@ $(DIR_BUILD)/print.c.o:$(DIR_LIB)/print.c $(DIR_INC)/print.h
 $(DIR_BUILD)/interrupt.c.o:$(DIR_KERNEL)/interrupt.c $(DIR_INC)/*
 	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
 $(DIR_BUILD)/init.o:$(DIR_KERNEL)/init.c $(DIR_INC)/*
+	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
+$(DIR_BUILD)/timer.o:$(DIR_KERNEL)/timer.c $(DIR_INC)/*
 	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
 # kernel main
 $(DIR_BUILD)/main.o: $(DIR_KERNEL)/main.c $(DIR_INC)/*	
