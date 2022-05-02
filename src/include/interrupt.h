@@ -9,6 +9,7 @@
 #define PIC_M_DATA   0x21  // 主片数据端口
 #define PIC_S_CTRL   0xA0  // 从片控制端口
 #define PIC_S_DATA   0xA1  // 从片数据端口
+
 // void* 是指向32地址类型
 typedef void* intrHandler;
 #define IDT_DESC_CNT    0x30
@@ -22,4 +23,28 @@ struct GateDesc
    uint16 funcOffsetHighWord; 
 };
 void initIdt();
+
+// 中断相关
+
+/* 定义中断状态：
+ * INTR_OFF = 0, 关中断
+ * INTR_ON  = 1, 开中断
+ */
+enum IntrStatus
+{
+   INTR_OFF,
+   INTR_ON
+};
+// eflags IF位掩码
+#define EFLAGS_IF_MASK 0x00000200
+// 获取EFLAGS
+uint32 getEflags(void);
+// 开中断
+enum IntrStatus intrEnable();
+// 关中断
+enum IntrStatus intrDisable();
+// 获取中断状态
+enum IntrStatus getIntrStatus(void);
+// 设置中断状态
+enum IntrStatus setIntrStatus(enum IntrStatus);
 #endif

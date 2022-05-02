@@ -110,3 +110,55 @@ void initIdt()
     putStr("IDT ADDR H: ");putHex((uint32)(idtOperand >> 32));cPutChar(0x07,'\n');
     asm volatile ("lidt %0"::"m"(idtOperand));
 }
+uint32 getEflags(void)
+{
+    uint32 eflags;
+    /* 内联汇编：获取EFLAGS寄存器
+     * 保存EFLAGS寄存器到栈中
+     * EFLAGS出栈到内存或寄存器中("=g",表示约束在内存或寄存器，由编译器决定)
+     */
+    asm volatile("pushfl; popl %0":"=g"(eflags));
+    return eflags;
+}
+
+enum IntrStatus intrEnable()
+{
+    enum IntrStatus oldStatus;
+    // 如果处于开中断状态，直接返回
+    if(INTR_ON == getIntrStatus())
+    {
+        oldStatus = INTR_ON;
+        return oldStatus;
+    }
+    // 此时中断处于被关闭状态，开启
+    oldStatus = INTR_OFF;
+    // 开启中断
+    asm volatile("sti");
+    return oldStatus;
+}
+
+enum IntrStatus intrDisable()
+{
+    enum IntrStatus oldStatus;
+    // 如果处于关中断状态，直接返回
+    if(INTR_OFF == getIntrStatus())
+    {
+        oldStatus = INTR_OFF;
+        return oldStatus;
+    }
+    // 关闭中断状态
+    oldStatus = INTR_ON;
+    asm volatile("cli":::"memory");
+    return oldStatus;
+}
+
+enum IntrStatus getIntrStatus()
+{
+    uint32 eflags  = getEflags();
+    return (eflags & EFLAGS_IF_MASK) ? INTR_ON : INTR_OFF; 
+}
+
+enum IntrStatus setIntrStatus(enum IntrStatus intrStatus)
+{
+    return intrStatus & INTR_ON ? intrEnable() : intrDisable();
+}

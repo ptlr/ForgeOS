@@ -1,6 +1,7 @@
 #include "init.h"
 #include "print.h"
 #include "stdint.h"
+#include "interrupt.h"
 char* MSG_KERNEL = "[05] kernel start\n";
 //char* MSG_KERNEL = "HW";
 void test();
@@ -10,7 +11,8 @@ void kernelMain(void)
     putStr(MSG_KERNEL);
     //test();
     init();
-    asm volatile("sti"); // 开启中断
+    //asm volatile("sti"); // 开启中断
+    intrEnable();
     while (1);
 }
 void test()
