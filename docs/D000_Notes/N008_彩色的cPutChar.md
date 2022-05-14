@@ -11,7 +11,7 @@
 
 ### 1 字符编码
 
-![字符编码](../img/N006_CharacterCode.png)
+![字符编码](./img/N006_CharacterCode.png)
 
 ### 2 显卡的简单操作
 
