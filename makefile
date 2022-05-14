@@ -1,6 +1,6 @@
 CC=gcc
 # C flags
-CFLAGS=-c -m32 -fno-builtin -fno-stack-protector -Wall
+CFLAGS=-c -m32 -nostdlib -fno-builtin -fno-stack-protector -Wall -Wstrict-prototypes -Wmissing-prototypes
 
 AS=nasm
 
@@ -26,7 +26,8 @@ DIR_SCRIPTS = ./scripts
 
 OBJ = 	$(DIR_BUILD)/kernel.o $(DIR_BUILD)/print.a.o $(DIR_BUILD)/interrupt.a.o\
 		$(DIR_BUILD)/print.c.o $(DIR_BUILD)/main.o $(DIR_BUILD)/interrupt.c.o\
-		$(DIR_BUILD)/init.o $(DIR_BUILD)/timer.o
+		$(DIR_BUILD)/init.c.o $(DIR_BUILD)/timer.c.o $(DIR_BUILD)/debug.c.o\
+		$(DIR_BUILD)/string.c.o $(DIR_BUILD)/stdio.c.o
 
 BIN = $(DIR_BUILD)/boot.bin $(DIR_BUILD)/loader.bin $(DIR_BUILD)/kernel.bin
 
@@ -65,9 +66,17 @@ $(DIR_BUILD)/print.c.o:$(DIR_LIB)/print.c $(DIR_INC)/print.h
 # 编译interrupt.c
 $(DIR_BUILD)/interrupt.c.o:$(DIR_KERNEL)/interrupt.c $(DIR_INC)/*
 	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
-$(DIR_BUILD)/init.o:$(DIR_KERNEL)/init.c $(DIR_INC)/*
+$(DIR_BUILD)/init.c.o:$(DIR_KERNEL)/init.c $(DIR_INC)/*
 	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
-$(DIR_BUILD)/timer.o:$(DIR_KERNEL)/timer.c $(DIR_INC)/*
+$(DIR_BUILD)/timer.c.o:$(DIR_KERNEL)/timer.c $(DIR_INC)/*
+	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
+$(DIR_BUILD)/debug.c.o : $(DIR_KERNEL)/debug.c $(DIR_INC)/*
+	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
+# 编译string库
+$(DIR_BUILD)/string.c.o:$(DIR_LIB)/string.c $(DIR_INC)/*
+	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
+# 编译标准输入输出库
+$(DIR_BUILD)/stdio.c.o:$(DIR_LIB)/stdio.c $(DIR_INC)/*
 	$(CC) -I $(DIR_INC) $(CFLAGS) -o $@ $<
 # kernel main
 $(DIR_BUILD)/main.o: $(DIR_KERNEL)/main.c $(DIR_INC)/*	
