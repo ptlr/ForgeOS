@@ -36,7 +36,7 @@ static void makeIdtDesc(struct GateDesc* gateDesc, uint8 attr,intrHandler functi
     gateDesc->attribute = attr;
     gateDesc->funcOffsetHighWord = ((uint32)function & 0xFFFF0000) >> 16;
 }
-static void initIdtDesc()
+static void initIdtDesc(void)
 {
     int index;
     for (index = 0; index < IDT_DESC_CNT; index++)
@@ -71,7 +71,7 @@ static void initException(void){
     intrNames[18] = "#MC Machine-Check Exception";
     intrNames[19] = "#XF SIMD Floating-Point Exception";
 }
-static void initPic()
+static void initPic(void)
 {
     putStr("[08] init PIC\n");
     // 初始化主片

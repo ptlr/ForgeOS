@@ -22,7 +22,7 @@ struct GateDesc
    uint8 attribute;
    uint16 funcOffsetHighWord; 
 };
-void initIdt();
+void initIdt(void);
 
 // 中断相关
 
@@ -40,9 +40,9 @@ enum IntrStatus
 // 获取EFLAGS
 uint32 getEflags(void);
 // 开中断
-enum IntrStatus intrEnable();
+enum IntrStatus intrEnable(void);
 // 关中断
-enum IntrStatus intrDisable();
+enum IntrStatus intrDisable(void);
 // 获取中断状态
 enum IntrStatus getIntrStatus(void);
 // 设置中断状态

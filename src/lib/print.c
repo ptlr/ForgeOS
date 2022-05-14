@@ -1,10 +1,16 @@
 #include "print.h"
-
-void putStr(char* str){
+uint8 displayColor = COLOR_FG_GREEN | COLOR_FG_BLUE;
+uint8 setColor(uint8 color)
+{ 
+    uint8 oldColor = displayColor;
+    displayColor = color;
+    return oldColor;
+}
+void putStr(const char * str){
     int index = 0;
     while (str[index] != '\0')
     {
-        cPutChar(0x004, str[index]);
+        cPutChar(displayColor, str[index]);
         index++;
     } 
 }
