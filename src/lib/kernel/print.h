@@ -20,4 +20,5 @@ uint8 setColor(uint8 color);
 void cPutChar(uint8 color, uint8 asciiCh);
 void putStr(const char * str);
 void putHex(uint32 hexNum);
+void uint2HexStr(char* buff, uint32 num, uint32 width);
 #endif

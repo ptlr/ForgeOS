@@ -6,11 +6,11 @@ void panicSpin(char* fileName, int line, const char* func, const char* condition
 {
     // 条件不不满足，关中断
     intrDisable();
-    //printf("ERROR:\nFILE: %s\nLINE:%d\nCONDITION: %s\n", fileName, line, condition);
-    putStr("ERROR:\n");
-    putStr("FILE: ");putStr(fileName);putStr("\n");
-    putStr("LINE: ");putHex(line);putStr("\n");
-    putStr("CONDITION: ");putStr(condition);putStr("\n");
+    printf("ERROR:\nFILE: %s\nLINE:%d\nCONDITION: %s\n", fileName, line, condition);
+    //putStr("ERROR:\n");
+    //putStr("FILE: ");putStr(fileName);putStr("\n");
+    //putStr("LINE: ");putHex(line);putStr("\n");
+    //putStr("CONDITION: ");putStr(condition);putStr("\n");
     while (1);
 }
 void log(const char* label, const char* msg, uint8 color)

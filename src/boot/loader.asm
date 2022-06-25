@@ -47,7 +47,7 @@ dectMem:
 .loop:
     mov dword [es:di + 20], 1
     mov eax, 0xE820
-    mov ecx, 24
+    mov ecx, 20
     ;错误警告：
     ;不要把0x534D4150写成'SMAP'，编译后顺序会被改变，导致CF置位报错，还是老老实实写成16进制形式
     ;错误用法：mov edx, 'SMAP'

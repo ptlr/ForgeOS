@@ -2,18 +2,20 @@
 #include "string.h"
 #include "constant.h"
 #include "../include/stdint.h"
+#include "stdio.h"
 //内存相关
 
 /* 功能：将从dst_开始size个字节设置为value
+ * !注意：由这个函数引起一般性保护异常时，请检查调用函数的地址是否由问题
  */
 void memset(void* dst_, uint8 value, uint32 size)
 {
     ASSERT(dst_ != NULL);
     uint8* dst = (uint8*)dst_;
-    while (size-- > 0)
+    for(uint32 index = 0; index < size; index++)
     {
         *dst++ = value;
-    } 
+    }
 }
 /* 功能： 将src_开始的size个字节复制到dst_
  */

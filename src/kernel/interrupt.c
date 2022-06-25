@@ -1,6 +1,7 @@
 #include "stdint.h"
 #include "constant.h"
 #include "interrupt.h"
+#include "stdio.h"
 
 static struct GateDesc IDT[IDT_DESC_CNT];
 /* 这里的intrEntryTable是中断入口地址，中断对应的函数的地址被存放到了这里
@@ -21,11 +22,7 @@ static void generalIntrHandler(uint8 intrVecNum)
         return;
     }
     intrCount++;
-    putStr("Interrupt occur!, VEC_NUM = ");
-    putHex(intrVecNum);
-    putStr(", COUNT = ");
-    putHex(intrCount);
-    cPutChar(0x07,'\n');
+    printf("Interrupt occur!, VEC_NUM = %d, COUNT = %d\n", intrVecNum, intrCount);
 }
 
 static void makeIdtDesc(struct GateDesc* gateDesc, uint8 attr,intrHandler function)
@@ -93,21 +90,20 @@ static void initPic(void)
 }
 void initIdt()
 {
-    putStr("[07] init IDT\n");cPutChar(0x07,'\n');
+    putStr("[07] init IDT\n");
     initIdtDesc();
     initException();
     initPic();
     //while (1);
-    putHex((uint32)&IDT);cPutChar(0x07,'\n');
+    printf("    *IDT VADDR: %x\n",(uint32)&IDT);
     //uint64 preAddr = ;
     /*加载IDT
      * 先把32位地址转换成uint32
      * 再把uint32转化成uint64
      */
-    putStr("IDT SIZE: ");putHex(sizeof(IDT));cPutChar(0x07,'\n');
+    printf("    *IDT SIZE: %d\n", sizeof(IDT));
     uint64 idtOperand = ((uint64)((uint32)&IDT) << 16) | (sizeof(IDT) - 1);
-    putStr("IDT ADDR L: ");putHex((uint32)idtOperand);cPutChar(0x07,'\n');
-    putStr("IDT ADDR H: ");putHex((uint32)(idtOperand >> 32));cPutChar(0x07,'\n');
+    printf("    *IDTR: %x%x\n", (uint32)(idtOperand >> 32), (uint32)idtOperand);
     asm volatile ("lidt %0"::"m"(idtOperand));
 }
 uint32 getEflags(void)
