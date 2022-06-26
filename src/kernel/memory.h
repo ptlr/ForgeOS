@@ -67,5 +67,8 @@ struct Pool
 extern struct Pool kernelPool, userPool;
 
 void initMem(void);
+uint32* getPdePtr(uint32 vaddr);
+uint32* getPtePtr(uint32 vaddr);
+void* mallocPage(enum PoolFlag pf, uint32 pageCount);
 void* allocKernelPages(uint32 pageCount);
 #endif

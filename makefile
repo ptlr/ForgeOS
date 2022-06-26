@@ -15,7 +15,7 @@ DIR_SRC = ./src
 DIR_INC = ./src/include/
 DIR_BUILD = ./build/
 
-INC_DIRS = include/ lib/public/ lib/kernel/ lib/user kernel/
+INC_DIRS = include/ lib/public/ lib/kernel/ lib/user kernel/ thread/
 
 INC = $(addprefix -I ./src/, $(INC_DIRS))
 
@@ -26,6 +26,7 @@ DIR_KERNEL_LIB = $(DIR_LIB)/kernel/
 DIR_USER_LIB   = $(DIR_LIB)/user/
 
 DIR_KERNEL = $(DIR_SRC)/kernel
+DIR_THREAD = $(DIR_SRC)/thread
 
 LOADER_SECTOR_CNT 	= 2
 # expr 后面的表达式运算符和操作数之间需要空格
@@ -35,7 +36,8 @@ KERNEL_SECTOR_CNT	= 32
 DIR_SCRIPTS = ./scripts
 
 OBJ_NAMES = kernel.o print.a.o interrupt.a.o print.c.o main.o interrupt.c.o\
-		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o
+		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
+		thread.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -93,6 +95,9 @@ $(DIR_BUILD)stdio.c.o:$(DIR_PUBLIC_LIB)/stdio.c $(DIR_INC)/*
 $(DIR_BUILD)bitmap.c.o:$(DIR_KERNEL_LIB)bitmap.c $(DIR_KERNEL_LIB)bitmap.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 $(DIR_BUILD)memory.c.o: $(DIR_KERNEL)/memory.c $(DIR_KERNEL_LIB)/print.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译thread
+$(DIR_BUILD)thread.c.o:$(DIR_THREAD)/thread.c $(DIR_KERNEL_LIB)
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # kernel main
 $(DIR_BUILD)main.o: $(DIR_KERNEL)/main.c $(DIR_INC)/* $(DIR_KERNEL_LIB)/print.h	

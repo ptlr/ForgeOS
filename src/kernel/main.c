@@ -6,6 +6,7 @@
 #include "string.h"
 #include "stdio.h"
 #include "memory.h"
+#include "thread.h"
 
 char* MSG_KERNEL = "[05] kernel start\n";
 void strTest(void);
@@ -13,6 +14,7 @@ void stdioTest(void);
 void debugTest(void);
 void memTest(void);
 void kernelMain(void);
+void func_a(void*);
 void kernelMain(void)
 {
     printf("\n\n\n\n%s", MSG_KERNEL);
@@ -22,7 +24,8 @@ void kernelMain(void)
     //strTest();
     //stdioTest();
     //debugTest();
-    memTest();
+    //memTest();
+    startThread("KERNEL_THREAD_A", 31, func_a, "ARG-A ");
     while (1);
 }
 void memTest(void){
@@ -58,4 +61,15 @@ void debugTest(void)
     logInfor("This is an normal log");
     logWaring("This is an Waring log");
     logError("This is an Error log");
+}
+// 线程中调用的函数
+void func_a(void* funArg){
+    char* para = funArg;
+    uint32 count = 0;
+    while (1)
+    {
+        count++;
+        printf("PARA = %s, COUNT = %d\n",para, count);
+    }
+    
 }
