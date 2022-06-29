@@ -2,7 +2,17 @@
 #include "string.h"
 #include "debug.h"
 #include "stdio.h"
+#include "interrupt.h"
+#include "io.h"
 uint8 displayColor = COLOR_FG_GREEN | COLOR_FG_BLUE;
+void setCursor(uint16 cursor){
+    // 设置高8位
+    outb(0x03D4,0x0E);
+    outb(0x03D5, (uint8)((cursor & 0xFF00) >> 8));
+    // 设置低8位
+    outb(0x03D4,0x0F);
+    outb(0x03D5, (uint8)(cursor & 0x00FF));
+}
 uint8 setColor(uint8 color)
 { 
     uint8 oldColor = displayColor;
@@ -13,7 +23,9 @@ void putStr(const char * str){
     int index = 0;
     while (str[index] != '\0')
     {
+        //intrDisable();
         cPutChar(displayColor, str[index]);
+        //intrEnable();
         index++;
     } 
 }

@@ -19,13 +19,19 @@ void kernelMain(void)
 {
     printf("\n\n\n\n%s", MSG_KERNEL);
     init();
-    //intrEnable();
     //intrDisable();
     //strTest();
     //stdioTest();
     //debugTest();
     //memTest();
     startThread("KERNEL_THREAD_A", 31, func_a, "ARG-A ");
+    startThread("KERNEL_THREAD_B", 8, func_a, "ARG-B ");
+    intrEnable();
+    while(1){
+        intrDisable();
+        printf("main \n");
+        intrEnable();
+    }
     while (1);
 }
 void memTest(void){
@@ -69,7 +75,8 @@ void func_a(void* funArg){
     while (1)
     {
         count++;
-        printf("PARA = %s, COUNT = %d\n",para, count);
+        intrDisable();
+        printf("PARA = %s, COUNT = %d\n", para, count);
+        intrEnable();
     }
-    
 }

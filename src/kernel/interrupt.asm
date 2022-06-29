@@ -31,6 +31,9 @@ intr%1entry:
     out 0x20, al            ; 主片
 
     ;调用中断处理函数
+    ; 此处默认使用ds:[im]的方式访问，需要更新ds,需要注意，不能用cs的值更新，可以使用ss寄存器更新
+    mov ax, ss
+    mov ds, ax
     push %1 ; 压入中断号
     call [intrHandlerTable + %1 * 4]
     ; 平衡栈空间，跳过中断处理函数的参数

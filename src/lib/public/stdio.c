@@ -3,7 +3,7 @@
 #include "../include/stdint.h"
 #include "debug.h"
 #include "string.h"
-
+#include "interrupt.h"
 /* 整型转换成字符（Integer to ASCII）
  *
  */

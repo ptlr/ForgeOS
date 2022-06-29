@@ -77,8 +77,8 @@ static void addPageTable(void* vaddr, void* paddr){
     uint32* pde = getPdePtr(mVaddr);
     
     uint32* pte = getPtePtr(mVaddr);
-    //printf("PDE = 0x%x\n", *pde);
-    //printf("PTE = 0x%x\n", *pte);
+    printf("PDE = 0x%x\n", *pde);
+    printf("PTE = 0x%x\n", *pte);
     // 判断目录页是否存在，如果已存在表示该表已存在
     if(*pde & 0x00000001){
         // 如果pte不存在

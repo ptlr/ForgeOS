@@ -42,6 +42,8 @@ kernelStart:
     mov fs, ax
     mov ax, SELECTOR_TEXT
     mov gs, ax
+    ; 设置栈顶： 把程序的栈放到PCB中，此处把0xC01FF000~0xC01FFFFF规划为内核主线程的PCB
+    mov esp, 0xC0200000
 jmp SELECTOR_CODE : kernelMain
 
 ; 函数：initPage

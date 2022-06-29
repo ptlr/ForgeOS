@@ -1,6 +1,7 @@
 #ifndef __THREAD_H
 #define __THREAD_H
 #include "stdint.h"
+#include "list.h"
 /*
  *
  */
@@ -59,10 +60,33 @@ struct TaskStruct{
     uint32* selfKernelStack;
     enum TaskStatus status;
     uint8 priority;
-    char name[16];
+    char name[32];
+    // 每次在线程上运行的滴答数
+    uint8 ticks;
+    // 此任务占用了CPU多少个滴答数，即运行了多长时间
+    uint32 elapsedTicks;
+    // 在一般队列里的节点(没有数据，无需初始化数据，下同)
+    struct ListElem generalTag;
+    // 位于allList中的节点
+    struct ListElem allListTag;
+    // 进程自己页表的虚拟地址
+    uint32* pageDir;
+    // 魔术，用于检测栈边界是否溢出
     uint32 stackMagic;
 };
+// 用于初始化线程环境
+void initThreadEnv(void);
+// 导入外部函数
+extern void switch2(struct TaskStruct* currentThread, struct TaskStruct* nextThread);
+//获取当前线程的PCB
+struct TaskStruct* runningThread(void);
 void createThread(struct TaskStruct* pthread, thread_func func, void* funcArg);
 void initThread(struct TaskStruct* pthread, char* name, int prio);
 struct TaskStruct* startThread(char* name, int prio, thread_func func, void* funcArg);
+// 任务调度函数
+void schedule(void);
+/* 当前线程将阻塞自己，并将状态设置为status */
+void threadBlock(enum TaskStatus status);
+/* 将线程解除阻塞，并将状态设置为status */
+void threadUnblock(struct TaskStruct* thread);
 #endif

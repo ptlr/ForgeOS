@@ -2,6 +2,7 @@
 #include "constant.h"
 #include "interrupt.h"
 #include "stdio.h"
+#include "print.h"
 
 static struct GateDesc IDT[IDT_DESC_CNT];
 /* 这里的intrEntryTable是中断入口地址，中断对应的函数的地址被存放到了这里
@@ -17,12 +18,30 @@ intrHandler intrHandlerTable[IDT_DESC_CNT];
 int intrCount = 0;
 static void generalIntrHandler(uint8 intrVecNum)
 {
+    if(INTR_ON == getIntrStatus()){
+        intrDisable();
+    }
     if(intrVecNum == 0x27 || intrVecNum == 0x2F)
     {
         return;
     }
     intrCount++;
-    printf("Interrupt occur!, VEC_NUM = %d, COUNT = %d\n", intrVecNum, intrCount);
+    /* 中断处理函数：
+     * 中断处理函数需要格外的注意，需要健壮性，原因：其部分运行会导致寄存器数据错误，重新初始化寄存器以保证显示输出正常
+     */
+    setCursor(0);
+    //printf("Interrupt occur!, VEC_NUM = %d, COUNT = %d\n", intrVecNum, intrCount);
+    // 对缺页异常做简单的处理
+    if(intrVecNum == 14){
+        int pageFaultVaddr = 0;
+        asm ("movl %%cr2, %0" : "=r"(pageFaultVaddr));
+        char hexStr[64];
+        //uint2HexStr(hexStr, pageFaultVaddr, 8);
+        //putStr("Page fault vaddr: 0x");
+        //putStr(hexStr);putStr("\n");
+        //printf("Page fault vaddr: 0x%x\n", pageFaultVaddr);
+        while(1);
+    }
 }
 
 static void makeIdtDesc(struct GateDesc* gateDesc, uint8 attr,intrHandler function)
@@ -157,4 +176,7 @@ enum IntrStatus getIntrStatus()
 enum IntrStatus setIntrStatus(enum IntrStatus intrStatus)
 {
     return intrStatus & INTR_ON ? intrEnable() : intrDisable();
+}
+void registerHandler(uint8 intrVecNum, intrHandler func){
+    intrHandlerTable[intrVecNum] =  func;
 }

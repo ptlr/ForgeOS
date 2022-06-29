@@ -31,13 +31,13 @@ DIR_THREAD = $(DIR_SRC)/thread
 LOADER_SECTOR_CNT 	= 2
 # expr 后面的表达式运算符和操作数之间需要空格
 KERNEL_SEEK			= $(shell expr $(LOADER_SECTOR_CNT) + 1)
-# 增加到16KiB，共32个扇区
-KERNEL_SECTOR_CNT	= 32
+# 增加到64KiB，共128个扇区
+KERNEL_SECTOR_CNT	= 128
 DIR_SCRIPTS = ./scripts
 
 OBJ_NAMES = kernel.o print.a.o interrupt.a.o print.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
-		thread.c.o
+		thread.c.o list.c.o switch2.a.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -72,7 +72,9 @@ $(DIR_BUILD)print.a.o: $(DIR_KERNEL_LIB)/print.asm $(DIR_INC)/constant.inc
 # 编译interrupt.a.o
 $(DIR_BUILD)interrupt.a.o:$(DIR_KERNEL)/interrupt.asm $(DIR_INC)/*
 	$(AS) $(ASFLAGS) -o $@ $<
-
+# 编译switch2.a.o
+$(DIR_BUILD)switch2.a.o:$(DIR_THREAD)/switch2.asm $(DIR_INC)/*
+	$(AS) $(ASFLAGS) -o $@ $<
 # 编译print.c
 $(DIR_BUILD)print.c.o:$(DIR_KERNEL_LIB)/print.c $(DIR_KERNEL_LIB)/print.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
@@ -98,6 +100,9 @@ $(DIR_BUILD)memory.c.o: $(DIR_KERNEL)/memory.c $(DIR_KERNEL_LIB)/print.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译thread
 $(DIR_BUILD)thread.c.o:$(DIR_THREAD)/thread.c $(DIR_KERNEL_LIB)
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译list
+$(DIR_BUILD)list.c.o:$(DIR_KERNEL_LIB)/list.c $(DIR_KERNEL_LIB)/list.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # kernel main
 $(DIR_BUILD)main.o: $(DIR_KERNEL)/main.c $(DIR_INC)/* $(DIR_KERNEL_LIB)/print.h	

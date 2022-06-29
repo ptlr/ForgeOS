@@ -47,4 +47,6 @@ enum IntrStatus intrDisable(void);
 enum IntrStatus getIntrStatus(void);
 // 设置中断状态
 enum IntrStatus setIntrStatus(enum IntrStatus);
+// 注册中断
+void registerHandler(uint8 intrVecNum, intrHandler func);
 #endif
