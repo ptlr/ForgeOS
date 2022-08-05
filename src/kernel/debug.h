@@ -18,8 +18,7 @@ void panicSpin(char* fileName, int line, const char* func, const char* condition
 #else
     #define ASSERT(CONDITION) if(CONDITION){}else{PANIC(#CONDITION);}
 #endif /*NDEBUG*/
-void log(const char* label, const char* msg, uint8 color);
-void logInfor(const char* msg);
-void logWaring( const char* msg);
-void logError( const char* msg);
+//void log(const char* msg, uint8 color);
+void logWarning(const char* msg);
+void logError(const char* msg);
 #endif /*KERNEL_DEBUG_H*/

@@ -3,6 +3,7 @@
 #include "constant.h"
 #include "../include/stdint.h"
 #include "stdio.h"
+#include "stdarg.h"
 //内存相关
 
 /* 功能：将从dst_开始size个字节设置为value
@@ -151,4 +152,15 @@ uint32 strchrs(const char* str, const uint8 ch)
         p++;
     }
     return chCnt;
+}
+void format(char* buffer, const char* format, ...){
+    va_list args;
+    /**
+     * 根据调用约定，从右往左压入参数。
+     * format的地址+4等于可变参数的第一个参数。
+     * va_start把args地址指向format,va_args把ap+4后返回
+     */
+    va_start(args, format);
+    vsprintf(buffer, format, args);
+    va_end(args);
 }

@@ -47,4 +47,10 @@ char* strrchr(const char* str, const uint8 ch);
  *
  */
 uint32 strchrs(const char* str, const uint8 ch);
+
+/*
+ * 格式化字符串
+ * 
+ */
+void format(char* buffer, const char* format, ...);
 #endif

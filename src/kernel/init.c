@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "memory.h"
 #include "thread.h"
+#include "console.h"
 void init(void)
 {
     putStr("[06] start init\n");
@@ -9,4 +10,5 @@ void init(void)
     initTimer();
     initMem();
     initThreadEnv();
+    consoleInit();
 }

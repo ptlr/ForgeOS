@@ -15,10 +15,13 @@
 #define COLOR_FG_DRAK 0x00
 
 #define DEFAULT_COLOR  COLOR_FG_GREEN | COLOR_FG_BLUE
+uint16 getCursor();
 void setCursor(uint16 cursor);
 uint8 setColor(uint8 color);
 void cPutChar(uint8 color, uint8 asciiCh);
+void putChar(uint8 asciiCh);
 void putStr(const char * str);
-void putHex(uint32 hexNum);
+/*支持二进制、8进制、10进制、16进制*/
+void putNum(uint32 num, uint32 base);
 void uint2HexStr(char* buff, uint32 num, uint32 width);
 #endif

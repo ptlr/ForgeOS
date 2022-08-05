@@ -77,8 +77,8 @@ static void addPageTable(void* vaddr, void* paddr){
     uint32* pde = getPdePtr(mVaddr);
     
     uint32* pte = getPtePtr(mVaddr);
-    printf("PDE = 0x%x\n", *pde);
-    printf("PTE = 0x%x\n", *pte);
+    //printf("PDE = 0x%x\n", *pde);
+    //printf("PTE = 0x%x\n", *pte);
     // 判断目录页是否存在，如果已存在表示该表已存在
     if(*pde & 0x00000001){
         // 如果pte不存在
@@ -86,7 +86,6 @@ static void addPageTable(void* vaddr, void* paddr){
             *pte = (pagePaddr | PAGE_US_U | PAGE_RW_W | PAGE_P_1);
         }else{
             // 目前不应该执行到这里
-            logError("PTE repeat");
             PANIC("PTE repeat");
             *pte = (pagePaddr | PAGE_US_U | PAGE_RW_W | PAGE_P_1);
         }
@@ -128,7 +127,7 @@ static void initMemPool(uint32 maxMemSize)
     printf("    *init memory pool\n");
     uint32 sizeMB = maxMemSize / 1024 / 1024;
     if(sizeMB > 1024){
-        logWaring("Memory size Biger than 1024MiB.");
+        putStr("Memory size Biger than 1024MiB.");
         maxMemSize = 1024 * 1024 * 1024;
     }
     /* 计算出可用的内存数：

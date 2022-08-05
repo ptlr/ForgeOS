@@ -14,8 +14,6 @@ char* intrNames[IDT_DESC_CNT];
 extern intrHandler intrEntryTable[IDT_DESC_CNT];
 // 中断处理程序（C）
 intrHandler intrHandlerTable[IDT_DESC_CNT];
-// 临时
-int intrCount = 0;
 static void generalIntrHandler(uint8 intrVecNum)
 {
     if(INTR_ON == getIntrStatus()){
@@ -25,23 +23,24 @@ static void generalIntrHandler(uint8 intrVecNum)
     {
         return;
     }
-    intrCount++;
-    /* 中断处理函数：
-     * 中断处理函数需要格外的注意，需要健壮性，原因：其部分运行会导致寄存器数据错误，重新初始化寄存器以保证显示输出正常
-     */
-    setCursor(0);
-    //printf("Interrupt occur!, VEC_NUM = %d, COUNT = %d\n", intrVecNum, intrCount);
+    setColor(COLOR_BG_DARK | COLOR_FG_RED);
+    putStr("\n================================================================================");
+    putStr("                                EXCEPTION OCCUR!\n");
+    putStr("--------------------------------------------------------------------------------");
+    putStr("INTR NUM : 0x");putNum((uint32)intrVecNum, 16);
+    putStr("\nINTR NAME: ");
+    putStr(intrNames[intrVecNum]);
+    putStr("\n");
+    putStr("INTR INFO:\n");
     // 对缺页异常做简单的处理
     if(intrVecNum == 14){
         int pageFaultVaddr = 0;
         asm ("movl %%cr2, %0" : "=r"(pageFaultVaddr));
-        char hexStr[64];
-        //uint2HexStr(hexStr, pageFaultVaddr, 8);
-        //putStr("Page fault vaddr: 0x");
-        //putStr(hexStr);putStr("\n");
-        //printf("Page fault vaddr: 0x%x\n", pageFaultVaddr);
-        while(1);
+        putStr("    Page fault vaddr is 0x");putNum(pageFaultVaddr,16);
+        putChar('\n');
     }
+    putStr("================================================================================"); 
+    while(1);
 }
 
 static void makeIdtDesc(struct GateDesc* gateDesc, uint8 attr,intrHandler function)

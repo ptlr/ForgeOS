@@ -64,7 +64,7 @@ void initThread(struct TaskStruct* pthread, char* name, int prio){
 struct TaskStruct* startThread(char* name, int prio, thread_func func, void* funcArg){
     // PCB都放在内核空间
     struct TaskStruct* thread = allocKernelPages(1);
-    printf("THREAD PCB VADDR: 0x%x\n", (uint32)thread);
+    //printf("THREAD PCB VADDR: 0x%x\n", (uint32)thread);
     initThread(thread, name, prio);
     createThread(thread, func, funcArg);
     // 确保线程不在就绪队列中
@@ -73,13 +73,6 @@ struct TaskStruct* startThread(char* name, int prio, thread_func func, void* fun
     // 确保不在所有队列中
     ASSERT(!listFind(&allThreadList, &thread->allListTag));
     listAppend(&allThreadList, &thread->allListTag);
-    printf("ST\n");
-    /*asm volatile("movl %0, %%esp;\
-    pop %%ebp;\
-    pop %%ebx;\
-    pop %%edi;\
-    pop %%esi;\
-    ret;": :"g"(thread->selfKernelStack):"memory");*/
     return thread;
 }
 static void implementMainThread(void){
@@ -92,8 +85,6 @@ static void implementMainThread(void){
     // 当前线程不在ready队列中，加入到allThreadList中
     ASSERT(!listFind(&allThreadList, &kernelMainThread->allListTag));
     listAppend(&allThreadList, &kernelMainThread->allListTag);
-    printf("IMT:: kernel main\n");
-    printf("IMT:: MT vaddr = 0x%x\n", kernelMainThread);
 }
 struct TaskStruct* runningThread(void){
     uint32 esp;
@@ -102,7 +93,8 @@ struct TaskStruct* runningThread(void){
     return (struct TaskStruct*)(esp & 0xFFFFF000);
 }
 void schedule(){
-    printf("SCH-IN\n");
+    //printf("SCH-IN\n");
+    //logWarning("SCH-IN\n");
     // 在切换线程的过程中，关闭中断，保证切换的过程中不受影响。
     ASSERT(getIntrStatus() == INTR_OFF);
     struct TaskStruct* current = runningThread();
@@ -114,10 +106,8 @@ void schedule(){
     }else{
         /* 如果此线程需要某件事发生后才继续运行，不需要加入到就绪队列 */
     }
-    //printf("SCH-M\n");
     // 调度其他任务， ready队列不应该为空
     ASSERT(!listIsEmpty(&readyThreadList));
-    struct ListElem* generalTag;
     struct ListElem* threadTag = listPop(&readyThreadList);
     struct TaskStruct* next = elem2entry(struct TaskStruct, generalTag, threadTag);
     next->status =  TASK_RUNNING;
@@ -140,6 +130,7 @@ void threadBlock(enum TaskStatus status){
     enum IntrStatus oldStatus = intrDisable();
     struct TaskStruct* thread = runningThread();
     thread->status = status;
+    //printf("Thread Status TB: 0x%d\n", (uint32)thread->status);
     // 将当前线程换下处理器
     schedule();
     setIntrStatus(oldStatus);
@@ -147,5 +138,15 @@ void threadBlock(enum TaskStatus status){
 /* 将线程解除阻塞，并将状态设置为status */
 void threadUnblock(struct TaskStruct* thread){
     enum IntrStatus oldStatus = intrDisable();
+    //printf("Thread Status: 0x%d\n", &thread->status);
+    ASSERT(thread->status == TASK_BLOCKED || thread->status == TASK_WAITING || thread->status == TASK_HANGING);
+    if(thread->status != TASK_READY){
+        if(listFind(&readyThreadList, &thread->generalTag)){
+            PANIC("Thread unblock: blocked thread in ready list\n");
+        }
+        // 将唤醒的线程放到队列的最前面，使其尽快得到调度
+        listPush(&readyThreadList, &thread->generalTag);
+        thread->status = TASK_READY;
+    }
     setIntrStatus(oldStatus);
 }

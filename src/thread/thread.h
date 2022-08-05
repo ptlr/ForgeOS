@@ -1,5 +1,5 @@
-#ifndef __THREAD_H
-#define __THREAD_H
+#ifndef THREAD_THREAD_H
+#define THREAD_THREAD_H
 #include "stdint.h"
 #include "list.h"
 /*
@@ -74,6 +74,9 @@ struct TaskStruct{
     // 魔术，用于检测栈边界是否溢出
     uint32 stackMagic;
 };
+/* ToDo::目前意义不明
+ */
+struct ListElem* generalTag;
 // 用于初始化线程环境
 void initThreadEnv(void);
 // 导入外部函数

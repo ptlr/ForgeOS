@@ -1,6 +1,13 @@
 CC=gcc
 # C flags
-CFLAGS= -g -c -m32 -nostdlib -fno-builtin -fno-stack-protector -Wall -Wstrict-prototypes -Wmissing-prototypes
+CFLAGS= -g -c -m32
+CFLAGS	+= -nostdlib
+CFLAGS	+= -fno-builtin
+CFLAGS	+= -fno-stack-protector
+CFLAGS	+= -Wall
+#CFLAGS	+= -o0
+#CFLAGS	+= -Wstrict-prototypes
+#CFLAGS	+= -Wmissing-prototypes
 
 AS=nasm
 
@@ -15,7 +22,8 @@ DIR_SRC = ./src
 DIR_INC = ./src/include/
 DIR_BUILD = ./build/
 
-INC_DIRS = include/ lib/public/ lib/kernel/ lib/user kernel/ thread/
+INC_DIRS = include/ lib/public/ lib/kernel/ lib/user kernel/ thread/ \
+			device/
 
 INC = $(addprefix -I ./src/, $(INC_DIRS))
 
@@ -27,6 +35,7 @@ DIR_USER_LIB   = $(DIR_LIB)/user/
 
 DIR_KERNEL = $(DIR_SRC)/kernel
 DIR_THREAD = $(DIR_SRC)/thread
+DIR_DEVICE = $(DIR_SRC)/device
 
 LOADER_SECTOR_CNT 	= 2
 # expr 后面的表达式运算符和操作数之间需要空格
@@ -37,7 +46,7 @@ DIR_SCRIPTS = ./scripts
 
 OBJ_NAMES = kernel.o print.a.o interrupt.a.o print.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
-		thread.c.o list.c.o switch2.a.o
+		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -103,6 +112,12 @@ $(DIR_BUILD)thread.c.o:$(DIR_THREAD)/thread.c $(DIR_KERNEL_LIB)
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译list
 $(DIR_BUILD)list.c.o:$(DIR_KERNEL_LIB)/list.c $(DIR_KERNEL_LIB)/list.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译sync
+$(DIR_BUILD)sync.c.o:$(DIR_THREAD)/sync.c $(DIR_THREAD)/sync.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译console
+$(DIR_BUILD)console.c.o:$(DIR_DEVICE)/console.c $(DIR_DEVICE)/console.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # kernel main
 $(DIR_BUILD)main.o: $(DIR_KERNEL)/main.c $(DIR_INC)/* $(DIR_KERNEL_LIB)/print.h	
