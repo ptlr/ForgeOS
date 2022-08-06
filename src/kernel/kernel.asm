@@ -4,14 +4,15 @@
 
 global kernelStart
 extern kernelMain
-
 [SECTION .data]
 GDT:
-DESC_BASE:   dq 0x00_0_0_00_000000_0000
-DESC_CODE:   dq 0x00_C_F_9A_000000_FFFF     ; 可读的执行代码段,0~4GB,界限粒度4KB,32位操作数32位代码段
-DESC_DATA:   dq 0x00_C_F_93_000000_FFFF     ; 可读写的数据段,映射至0～4GB,界限粒度4KB
-DESC_TEXT:   dq 0xC0_0_0_93_0B8000_7FFF     ; 可读写的数据段，粒度1字节，物理地址区间0xB8000~0xB8FFF, 虚拟地址区间0xC00B_8000~0xC00B_8FFF
-
+DESC_BASE:          dq 0x00_0_0_00_000000_0000
+DESC_KERNEL_CODE:   dq 0x00_C_F_9A_000000_FFFF     ; 可读的执行代码段,0~4GB,界限粒度4KB,32位操作数32位代码段
+DESC_KERNEL_DATA:   dq 0x00_C_F_93_000000_FFFF     ; 可读写的数据段,映射至0～4GB,界限粒度4KB
+DESC_KERNEL_TEXT:   dq 0xC0_0_0_93_0B8000_7FFF     ; 可读写的数据段，粒度1字节，物理地址区间0xB8000~0xB8FFF, 虚拟地址区间0xC00B_8000~0xC00B_8FFF
+DESC_TSS:           dq 0x00_0_0_00_000000_0000     ; 为TSS预留
+DESC_USER_CODE:     dq 0x00_0_0_00_000000_0000     ; 用户代码段
+DESC_USER_DATA:     dq 0x00_0_0_00_000000_0000      ; 用户数据段
 GDT_SIZE EQU $-GDT
 
 GDT_PTR:
@@ -19,9 +20,9 @@ GDT_LEN:    dw  GDT_SIZE - 1
 GDT_BASE:   dd  DESC_BASE
 
 ; 选择子
-SELECTOR_CODE   EQU 1 << 3 + 0
-SELECTOR_DATA   EQU 2 << 3 + 0
-SELECTOR_TEXT   EQU 3 << 3 + 0
+SELECTOR_KERNEL_CODE   EQU 1 << 3 + 0
+SELECTOR_KERNEL_DATA   EQU 2 << 3 + 0
+SELECTOR_KERNEL_TEXT   EQU 3 << 3 + 0
 
 [SECTION .text]
 [BITS 32]
@@ -35,16 +36,16 @@ kernelStart:
     mov cr0, eax
     lgdt [GDT_PTR]
     ; 重新初始化选择子
-    mov ax, SELECTOR_DATA
+    mov ax, SELECTOR_KERNEL_DATA
     mov ds, ax
     mov es, ax
     mov ss, ax
     mov fs, ax
-    mov ax, SELECTOR_TEXT
+    mov ax, SELECTOR_KERNEL_TEXT
     mov gs, ax
     ; 设置栈顶： 把程序的栈放到PCB中，此处把0xC01FF000~0xC01FFFFF规划为内核主线程的PCB
     mov esp, 0xC0200000
-jmp SELECTOR_CODE : kernelMain
+jmp SELECTOR_KERNEL_CODE : kernelMain
 
 ; 函数：initPage
 ; 功能：建立并初始化一个页目录表，建立并初始化一个内核页表。

@@ -103,7 +103,10 @@ static void initPic(void)
     outb(PIC_S_DATA, 0x01); // ICW4: 8086模式，正常EOI模式
 
     /*打开主片上的IRO, 即，只产生时钟中断*/
-    outb(PIC_M_DATA, 0xFE); // 主片OCW1: 开启IR0(时钟中断)
+    // 测试键盘，关闭其他中断
+    //outb(PIC_M_DATA, 0xFE); // 主片OCW1: 开启IR0(时钟中断)
+    //outb(PIC_M_DATA, 0xFD); // 只开启键盘中断
+    outb(PIC_M_DATA, 0xFC); // 开启时钟中断和键盘中断
     outb(PIC_S_DATA, 0xFF); // 从片OCW1：屏蔽所有中断
 }
 void initIdt()

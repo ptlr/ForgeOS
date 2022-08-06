@@ -8,9 +8,12 @@
 #include "memory.h"
 #include "thread.h"
 #include "console.h"
+#include "keyboard.h"
+#include "ioqueue.h"
 
 char* MSG_KERNEL = "[05] kernel start\n";
 void func(void* funcArg);
+void keyFunc(void* arg);
 void kernelMain(void)
 {
     printf("\n\n\n\n%s", MSG_KERNEL);
@@ -20,12 +23,13 @@ void kernelMain(void)
     //stdioTest();
     //debugTest();
     //memTest();
-    startThread("KERNEL_THREAD_A", 31, func, "ARG-A ");
-    startThread("KERNEL_THREAD_B", 8, func, "ARG-B ");
+    /*startThread("KERNEL_THREAD_A", 31, func, "ARG-A ");
+    startThread("KERNEL_THREAD_B", 8, func, "ARG-B ");*/
+    kbdIoqTest();
     intrEnable();
-    while(1){
+    /*while(1){
         consolePrint("main ");
-    }
+    }*/
     while(1);
 }
 void putNumTest(void){
@@ -70,5 +74,19 @@ void func(void* funArg){
         putStr(para);
         intrEnable();*/
         consolePrint(para);
+    }
+}
+void kbdIoqTest(){
+    startThread("KERNEL_THREAD_A", 31, keyFunc, "A_");
+    startThread("KERNEL_THREAD_B", 8, keyFunc, "B_");
+}
+// 键盘消费者
+void keyFunc(void* arg){
+    while(1){
+        enum IntrStatus oldStatus = intrDisable();
+        char* key = "_ ";
+        key[0] = ioqGetChar(&KBD_BUFFER);
+        consolePrint(arg);consolePrint(key);
+        setIntrStatus(oldStatus);
     }
 }

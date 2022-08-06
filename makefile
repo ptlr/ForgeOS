@@ -23,7 +23,7 @@ DIR_INC = ./src/include/
 DIR_BUILD = ./build/
 
 INC_DIRS = include/ lib/public/ lib/kernel/ lib/user kernel/ thread/ \
-			device/
+			device/ user/
 
 INC = $(addprefix -I ./src/, $(INC_DIRS))
 
@@ -36,6 +36,7 @@ DIR_USER_LIB   = $(DIR_LIB)/user/
 DIR_KERNEL = $(DIR_SRC)/kernel
 DIR_THREAD = $(DIR_SRC)/thread
 DIR_DEVICE = $(DIR_SRC)/device
+DIR_USER   = $(DIR_SRC)/user
 
 LOADER_SECTOR_CNT 	= 2
 # expr 后面的表达式运算符和操作数之间需要空格
@@ -46,7 +47,8 @@ DIR_SCRIPTS = ./scripts
 
 OBJ_NAMES = kernel.o print.a.o interrupt.a.o print.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
-		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o
+		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o keyboard.c.o \
+		ioqueue.c.o tss.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -118,6 +120,15 @@ $(DIR_BUILD)sync.c.o:$(DIR_THREAD)/sync.c $(DIR_THREAD)/sync.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译console
 $(DIR_BUILD)console.c.o:$(DIR_DEVICE)/console.c $(DIR_DEVICE)/console.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译keybord
+$(DIR_BUILD)keyboard.c.o:$(DIR_DEVICE)/keyboard.c $(DIR_DEVICE)/keyboard.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译ioqueue
+$(DIR_BUILD)ioqueue.c.o:$(DIR_DEVICE)/ioqueue.c $(DIR_DEVICE)/ioqueue.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译TSS
+$(DIR_BUILD)tss.c.o: $(DIR_USER)/tss.c $(DIR_USER)/tss.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # kernel main
 $(DIR_BUILD)main.o: $(DIR_KERNEL)/main.c $(DIR_INC)/* $(DIR_KERNEL_LIB)/print.h	

@@ -37,6 +37,6 @@ void initTimer()
     setFrequency(PORT_COUNTER0, SC_COUNTER0, RWL_LOW_HIGH, COUNTOR_MODE2, countVal);
     // 注册时钟中断处理函数
     //printf("TIH: 0x%x\n", timerIntrHandler);
-    registerHandler(0x20, timerIntrHandler);
+    registerHandler(INTR_0x20_TIMEER, timerIntrHandler);
     //while(1);
 }

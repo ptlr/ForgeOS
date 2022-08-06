@@ -9,7 +9,9 @@
 #define PIC_M_DATA   0x21  // 主片数据端口
 #define PIC_S_CTRL   0xA0  // 从片控制端口
 #define PIC_S_DATA   0xA1  // 从片数据端口
-
+// 中断号
+#define INTR_0x20_TIMEER   0x20
+#define INTR_0x21_KEYBOARD 0x21  
 // void* 是指向32地址类型
 typedef void* intrHandler;
 #define IDT_DESC_CNT    0x30

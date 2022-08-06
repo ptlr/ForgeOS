@@ -3,6 +3,9 @@
 #include "memory.h"
 #include "thread.h"
 #include "console.h"
+#include "keyboard.h"
+#include "tss.h"
+
 void init(void)
 {
     putStr("[06] start init\n");
@@ -11,4 +14,6 @@ void init(void)
     initMem();
     initThreadEnv();
     consoleInit();
+    initKeyboard();
+    initTss();
 }
