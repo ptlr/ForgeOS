@@ -1,10 +1,11 @@
-extern cPutChar
-extern putHex
-extern putStr
-
 extern intrHandlerTable
-
+; 导入系统调用
+extern syscallTable
+; 导出系统调用
+global syscallHandler
 global intrEntryTable
+global intrExit
+
 %define ERROR_CODE  nop
 %define ERROR_ZERO  push 0
 ; bug勘误：
@@ -36,8 +37,6 @@ intr%1entry:
     mov ds, ax
     push %1 ; 压入中断号
     call [intrHandlerTable + %1 * 4]
-    ; 平衡栈空间，跳过中断处理函数的参数
-    add esp, 4
 
     jmp intrExit
 ; 这里的“.data”部分必须被定义
@@ -47,7 +46,33 @@ intr%1entry:
 %endmacro
 [SECTION .text]
 [BITS 32]
+syscallHandler:
+    push 0
+
+    push ds
+    push es
+    push fs
+    push gs
+    pushad
+
+    push 0x80
+
+    push edx
+    push ecx
+    push ebx
+
+    call [syscallTable + eax * 4]
+    add esp, 12     ; 栈平衡，跳过三个参数
+
+    ; 将返回值保存在eax中
+    mov [esp  + 8 * 4], eax
+    jmp intrExit
+
+[SECTION .text]
+[BITS 32]
 intrExit:
+    ; 平衡栈空间，跳过中断处理函数的参数(中断向量号)
+    add esp, 4
     popad
     pop gs
     pop fs
@@ -109,4 +134,3 @@ VECTOR 0x2C, ERROR_ZERO    ;ps/2鼠标
 VECTOR 0x2d, ERROR_ZERO    ;fpu浮点单元异常
 VECTOR 0x2E, ERROR_ZERO    ;硬盘
 VECTOR 0x2F, ERROR_ZERO    ;保留
-

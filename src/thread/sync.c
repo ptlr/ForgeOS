@@ -4,6 +4,8 @@
 #include "interrupt.h"
 #include "thread.h"
 #include "print.h"
+#include "string.h"
+
 /*初始信号量*/
 void semaInit(struct Semaphore* sema, uint8 value){
     sema->value = value;
@@ -35,34 +37,44 @@ void semaUp(struct Semaphore* sema){
     // 所有操作在光终端后
     enum IntrStatus oldStatus = intrDisable();
     if(!listIsEmpty(&sema->waitList)){
+        //logError("List not empty!");
         struct TaskStruct* blockedThread = elem2entry(struct TaskStruct, generalTag, listPop(&sema->waitList));
         threadUnblock(blockedThread);
+    }else{
+        //logWarning("List empty!");
     }
     sema->value++;
     ASSERT(sema->value == 1);
     setIntrStatus(oldStatus);
 }
 /*初始化锁*/
-void lockInit(struct Lock* lock){
+void lockInit(struct Lock* lock, char* name){
+    memset(lock->name, '\0', 64);
+    memcpy(&lock->name, name, strlen(name));
     lock->holder = NULL;
     lock->holderRepeatNum = 0;
     semaInit(&lock->seamphore, 1);
 }
 /*申请锁*/
 void lockAcquire(struct Lock* lock){
+    /*char buff[64];
+    memset(buff, '\0', 64);
+    format(buff, "Acqueire %s\n",&lock->name);
+    logWarning(buff);*/
     if(lock->holder != runningThread()){
         semaDown(&lock->seamphore);
         lock->holder = runningThread();
         ASSERT(lock->holderRepeatNum == 0);
     }else{
-        intrDisable();
-        putStr("HRN++\n");
-        intrEnable();
         lock->holderRepeatNum++;
     }
 }
 /*释放锁*/
 void lockRelease(struct Lock* lock){
+   /*char buff[64];
+    memset(buff, '\0', 64);
+    format(buff, "Release %s\n",&lock->name);
+    logWarning(buff);*/
     if(lock->holderRepeatNum > 1){
         lock->holderRepeatNum--;
         return;

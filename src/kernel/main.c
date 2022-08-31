@@ -10,83 +10,53 @@
 #include "console.h"
 #include "keyboard.h"
 #include "ioqueue.h"
+#include "process.h"
+#include "bitmap.h"
+#include "syscall.h"
+#include "syscall-init.h"
+#include "stdint.h"
 
 char* MSG_KERNEL = "[05] kernel start\n";
-void func(void* funcArg);
-void keyFunc(void* arg);
+char buff[128];
+uint16 UPA_PID;
+uint16 UPB_PID = 0x64;
+void kThreadA(void*);
+void kThreadB(void*);
+void uProcA(void);
+void uProcB(void);
 void kernelMain(void)
 {
     printf("\n\n\n\n%s", MSG_KERNEL);
     init();
-    //intrDisable();
-    //strTest();
-    //stdioTest();
-    //debugTest();
-    //memTest();
-    /*startThread("KERNEL_THREAD_A", 31, func, "ARG-A ");
-    startThread("KERNEL_THREAD_B", 8, func, "ARG-B ");*/
-    kbdIoqTest();
+    processExecute(uProcA, "UPA");
+    processExecute(uProcB, "UPB");
     intrEnable();
-    /*while(1){
-        consolePrint("main ");
-    }*/
+    memset(buff, '\0', 128);
+    format(buff, "Kernel thread Main pid: 0x%x\n", (uint32)sys_getpid());
+    consolePrint(buff);
+    startThread("KTA", 31, kThreadA, "argA ");
+    startThread("KTB", 31, kThreadB, "argB ");
     while(1);
 }
-void putNumTest(void){
-    for(uint32 num = 0; num < 17; num++){
-        putStr("BIN: ");putNum(num,2);putStr(", DEC: ");putNum(num,10);putStr(", HEX: ");putNum(num,16);putChar('\n');
-    }
+void uProcA(void){
+    UPA_PID = getpid();
+    while(1);
 }
-void memTest(void){
-    void* p1 = allocKernelPages(1);
-    void* p2 = allocKernelPages(1);
-    void* p3 = allocKernelPages(3);
-
-    printf("P1 vaddr = 0x%x\nP2 vaddr = 0x%x\nP3 vaddr = 0x%x\n",(uint32)p1, (uint32)p2, (uint32)p3);
+void uProcB(void){
+    UPB_PID = getpid();
+    while(1);
 }
-void stdioTest(void){
-   // 十六进制测试
-   printf("Hex number: %x\n",16);
-   // 十进制测试
-   printf("Dec number: %d\n",16);
-   // 字符串测试
-   printf("Str : %s\n%s\n%c\n","Hello World!", "Forge OS!",'F');
-   printf("Char test: %c%c%c\n",'A','S','D');
+void kThreadA(void* arg){
+    char buffA[128];
+    memset(buffA, '\0', 128);
+    format(buffA, "Kernel thread A pid: 0x%x, UPA PID: 0x%x\n", (uint32)sys_getpid(), (uint32)UPA_PID);
+    consolePrint(buffA);
+    while(1);
 }
-
-void strTest(void)
-{
-    char* strA = "ABC\n";
-    char* strB = "DEF\n";
-    char* result = "ABC\nDEF\n";
-    char* AAndB = strcat(strA, strB);
-    putStr(AAndB);
-    putStr(result);
-    ASSERT(strcmp(AAndB, result) == 0);
-}
-
-// 线程中调用的函数
-void func(void* funArg){
-    char* para = funArg;
-    while (1)
-    {
-        /*intrDisable();
-        putStr(para);
-        intrEnable();*/
-        consolePrint(para);
-    }
-}
-void kbdIoqTest(){
-    startThread("KERNEL_THREAD_A", 31, keyFunc, "A_");
-    startThread("KERNEL_THREAD_B", 8, keyFunc, "B_");
-}
-// 键盘消费者
-void keyFunc(void* arg){
-    while(1){
-        enum IntrStatus oldStatus = intrDisable();
-        char* key = "_ ";
-        key[0] = ioqGetChar(&KBD_BUFFER);
-        consolePrint(arg);consolePrint(key);
-        setIntrStatus(oldStatus);
-    }
+void kThreadB(void* arg){
+    char buffB[128];
+    memset(buffB, '\0', 128);
+    format(buffB, "Kernel thread B pid: 0x%x, UPB PID: 0x%x\n", (uint32)sys_getpid(), (uint32)UPB_PID);
+    consolePrint(buffB);
+    while(1);
 }

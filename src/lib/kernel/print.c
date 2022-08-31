@@ -7,7 +7,7 @@
 #include "constant.h"
 
 uint8 displayColor = COLOR_FG_GREEN | COLOR_FG_BLUE;
-uint16 getCursor(){
+uint16 getCursor(void){
     uint16 cursor = 0;
     outb(0x03D4, 0x0E);
     cursor = inb(0x03D5);
@@ -66,7 +66,7 @@ void putStr(const char * str){
     int index = 0;
     while (str[index] != '\0')
     {
-        cPutChar(displayColor, str[index]);
+        cPutChar(displayColor, (char)str[index]);
         index++;
     } 
 }

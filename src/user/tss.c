@@ -3,17 +3,24 @@
 #include "constant.h"
 #include "string.h"
 #include "print.h"
+#include "console.h"
 // 最开始的TSS
 static struct TSS tss;
 /* 更新tss中ESP0字段的值为pthread的0级栈 */
 void updateTssEsp0(struct TaskStruct* pthread){
+    /*char buff[128] ={'\0'};
+    format(buff, "\nUT_ESP0:B PT = 0x%x\n",(uint32)pthread + PAGE_SIZE);
+    consolePrint(buff);*/
     tss.ESP0    = (uint32*)((uint32)pthread + PAGE_SIZE);
+    /*memset(buff, '\0',128);
+    format(buff, "\nUT_ESP0:A PT = 0x%x\n",(uint32)tss.ESP0);
+    consolePrint(buff);*/
 }
 static struct GdtDesc makeGdtDesc(uint32* descAddr, uint32 limit, uint8 attrLow, uint8 attrHigh){
     uint32 descBase = (uint32)descAddr;
     struct GdtDesc desc;
     desc.limitLowWord = limit & 0x0000FFFF;
-    desc.baseLowWord = descBase & 0x0000FFF;
+    desc.baseLowWord = descBase & 0x0000FFFF;
     desc.baseMidByte = (descBase & 0x00FF0000) >> 16;
     desc.attrLowByte = (uint8)attrLow;
     desc.LimiHighAttrHigh = (((limit & 0x000F0000) >> 16) + (uint8)(attrHigh));

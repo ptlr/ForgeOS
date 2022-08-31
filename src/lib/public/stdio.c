@@ -64,7 +64,6 @@ uint32 vsprintf(char* str, const char* format, va_list ap)
             break;
         }
     }
-    
     return strlen(str);
 }
 /*函数实现方式不安全，不建议使用*/

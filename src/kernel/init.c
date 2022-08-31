@@ -5,7 +5,7 @@
 #include "console.h"
 #include "keyboard.h"
 #include "tss.h"
-
+#include "syscall-init.h"
 void init(void)
 {
     putStr("[06] start init\n");
@@ -16,4 +16,5 @@ void init(void)
     consoleInit();
     initKeyboard();
     initTss();
+    syscallInit();
 }

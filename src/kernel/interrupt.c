@@ -10,10 +10,15 @@ static struct GateDesc IDT[IDT_DESC_CNT];
  */
 // 保存中断的名称
 char* intrNames[IDT_DESC_CNT];
-// 中断入口（汇编）
+/* 中断入口（汇编）
+ * 注意这里无需对汇编部分进行重新处理
+ */
 extern intrHandler intrEntryTable[IDT_DESC_CNT];
 // 中断处理程序（C）
 intrHandler intrHandlerTable[IDT_DESC_CNT];
+// 系统调用
+extern uint32 syscallHandler(void);
+
 static void generalIntrHandler(uint8 intrVecNum)
 {
     if(INTR_ON == getIntrStatus()){
@@ -58,7 +63,8 @@ static void initIdtDesc(void)
     {
         makeIdtDesc(&IDT[index], IDT_DESC_ATTR_DPL0, intrEntryTable[index]);
     }
-    
+    // 重新处理0x80号中断，用于系统调用
+    makeIdtDesc(&IDT[IDT_DESC_CNT - 1], IDT_DESC_ATTR_DPL3, syscallHandler);
 }
 static void initException(void){
     for(int index = 0; index < IDT_DESC_CNT; index++){

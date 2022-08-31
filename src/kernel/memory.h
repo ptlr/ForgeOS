@@ -2,6 +2,8 @@
 #define KERNEL_MEMORY_H
 #include "stdint.h"
 #include "bitmap.h"
+#include "sync.h"
+
 #define PAGE_SZIE 4096
 /* 内存管理设计：
  * 至多管理1GB内存，内核空间与用户空间平均分配，每个空间至多有512MiB内存空间。
@@ -14,7 +16,7 @@
 // 这里的地址需要十分注意，错误的地址会导致string库调用setmem时引发GP（一般性保护异常）
 // 内核虚拟地址开始的位置,此处需要加上低1MB和高1MB内存空间
 #define KERNEL_VADDR_START 0xC0200000 
-
+#define USER_VADDR_START 0x00000000
 // 内存信息个数入口
 #define ARDS_ENTRY_COUNT_PADDR 0x00007E00
 // 内存信息表地址
@@ -51,7 +53,7 @@ enum PoolFlag{
 #define PAGE_US_S   0   // U/S属性位，系统级
 #define PAGE_US_U   4   // U/S属性位。用户级 
 // 虚拟地址结构
-struct VirtualAddr
+struct VaddrPool
 {
     struct Bitmap vaddrBitmap;
     uint32 vaddrStart;
@@ -59,6 +61,8 @@ struct VirtualAddr
 // 内存池结构
 struct Pool
 {
+    // 申请内存时互斥
+    struct Lock lock;
     struct Bitmap bitmap;
     uint32 phyaddrStart;
     uint32 poolSize;
@@ -70,5 +74,8 @@ void initMem(void);
 uint32* getPdePtr(uint32 vaddr);
 uint32* getPtePtr(uint32 vaddr);
 void* mallocPage(enum PoolFlag pf, uint32 pageCount);
+void* mallocAPage(enum PoolFlag pf, uint32 vaddr);
+// 获取虚拟地址（VADDR）映射的 物理地址（PADDR）
+uint32 getVaddrMapedPaddr(uint32 vaddr);
 void* allocKernelPages(uint32 pageCount);
 #endif

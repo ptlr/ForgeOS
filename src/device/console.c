@@ -8,7 +8,7 @@ static struct Lock consoleLock;
 /*初始化终端*/
 void consoleInit(){
     putStr("[11] init console\n");
-    lockInit(&consoleLock);
+    lockInit(&consoleLock, "ConsoleLock");
 }
 /*获取终端*/
 void consoleAcquire(){
@@ -22,5 +22,11 @@ void consoleRelease(){
 void consolePrint(const char* msg){
     consoleAcquire();
     putStr(msg);
+    consoleRelease();
+}
+/*通过终端打印数字*/
+void consoleNum(uint32 num, int base){
+    consoleAcquire();
+    putNum(num, base);
     consoleRelease();
 }

@@ -15,7 +15,7 @@
 #define COLOR_FG_DRAK 0x00
 
 #define DEFAULT_COLOR  COLOR_FG_GREEN | COLOR_FG_BLUE
-uint16 getCursor();
+uint16 getCursor(void);
 void setCursor(uint16 cursor);
 uint8 setColor(uint8 color);
 void cPutChar(uint8 color, uint8 asciiCh);

@@ -4,6 +4,7 @@
 #include "../include/stdint.h"
 #include "stdio.h"
 #include "stdarg.h"
+#include "console.h"
 //内存相关
 
 /* 功能：将从dst_开始size个字节设置为value

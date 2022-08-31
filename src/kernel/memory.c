@@ -3,13 +3,17 @@
 #include "print.h"
 #include "debug.h"
 #include "string.h"
-
+#include "console.h"
+#include "thread.h"
+/*
+ *
+ */
 // 获取PDE的index
 #define PDE_INDEX(vaddr) ((vaddr & 0xFFC00000) >> 22)
 // 获取PTE的index
 #define PTE_INDEX(vaddr) ((vaddr & 0x003FF000) >> 12)
 
-struct VirtualAddr kernelVaddr;
+struct VaddrPool kernelVaddr;
 // 定义内核内存池和用户内存池
 struct Pool kernelPool, userPool;
 /* 
@@ -30,7 +34,16 @@ static void* getVaddrPages(enum PoolFlag pf, uint32 pageCount){
         vaddrStart = kernelVaddr.vaddrStart + bitIndexStart * PAGE_SZIE;
         
     }else{
-    // 分配用户空间的虚拟页
+        // 分配用户空间的虚拟页
+        struct TaskStruct* currentThread = runningThread();
+        bitIndexStart = scanBitmap(&currentThread->userProgVaddrPool.vaddrBitmap, pageCount);
+        if(bitIndexStart == -1) return  NULL;
+        while(count < pageCount){
+            setBitmap(&currentThread->userProgVaddrPool.vaddrBitmap, bitIndexStart + count++, 1);
+        }
+        vaddrStart = currentThread->userProgVaddrPool.vaddrStart + bitIndexStart * PAGE_SIZE;
+        // ToDo:: 这里理解不透彻，需要注意
+        ASSERT((uint32)vaddrStart < (0xC0000000 - PAGE_SZIE));
     }
     return (void*)vaddrStart;
 }
@@ -114,13 +127,59 @@ void* mallocPage(enum PoolFlag pf, uint32 pageCount){
     }
     return vaddrStart;
 }
-// 分配物理页
+// 分配内核物理页
 void* allocKernelPages(uint32 pageCount){
     void* vaddr = mallocPage(PF_KERNEL, pageCount);
     if(NULL != vaddr){
         memset(vaddr, 0, PAGE_SZIE);
     }
     return vaddr;
+}
+// 分配用户物理页
+void* allocUserPages(uint32 pageCount){
+    lockAcquire(&userPool.lock);
+    void* vaddr = mallocPage(PF_USER, pageCount);
+    memset(vaddr, 0, pageCount * PAGE_SIZE);
+    lockRelease(&userPool.lock);
+    return vaddr;
+}
+/* 关联虚拟地址与PF对应的物理页地址，仅支持1页
+ * 
+ */
+void* mallocAPage(enum PoolFlag pf, uint32 vaddr){
+    struct Pool* memPool = pf & PF_KERNEL ? &kernelPool : &userPool;
+    lockAcquire(&memPool->lock);
+    // 将对应的虚拟地址位图置1
+    struct TaskStruct* currThread = runningThread();
+    uint32 bitIndex = -1;
+    if(currThread->pageDir != NULL && pf == PF_USER){
+        bitIndex = (vaddr - currThread->userProgVaddrPool.vaddrStart) / PAGE_SIZE;
+        ASSERT(bitIndex > 0);
+        setBitmap(&currThread->userProgVaddrPool.vaddrBitmap, bitIndex, 1);
+    }else if(currThread->pageDir != NULL && pf == PF_KERNEL){
+        bitIndex = (vaddr - kernelVaddr.vaddrStart) / PAGE_SIZE;
+        ASSERT(bitIndex > 0);
+        setBitmap(&kernelVaddr.vaddrBitmap, bitIndex, 1);
+    }
+    void* pagePaddr = palloc(memPool);
+    if(pagePaddr == NULL){
+        //PANIC("mallocAPage: NET BE NULL");
+        consolePrint("mallocAPage: NOT BE NULL\n");
+        // 释放锁再返回
+        //lockAcquire(&memPool->lock);
+        return NULL;
+    }
+    addPageTable((void*)vaddr, pagePaddr);
+    lockRelease(&memPool->lock);
+    return (void*)vaddr;
+}
+// 获取虚拟地址（VADDR）映射的 物理地址（PADDR）
+uint32 getVaddrMapedPaddr(uint32 vaddr){
+    uint32* pte = getPtePtr(vaddr);
+    /* (*pte)的值是页表所在的物理页框地址
+     * 去掉低12位+虚拟地址的低12位
+     */
+    return ((*pte & 0xFFFFF000) + (vaddr & 0x00000FFF));
 }
 static void initMemPool(uint32 maxMemSize)
 {
@@ -171,7 +230,10 @@ static void initMemPool(uint32 maxMemSize)
     kernelVaddr.vaddrStart = KERNEL_VADDR_START;
     kernelVaddr.vaddrBitmap.length = kernelPool.bitmap.length;
     kernelVaddr.vaddrBitmap.bits = (void*)KERNEL_VMEM_BITMAP_VADDR;
-    printf("     kernel vaddr: VADDR_START = 0x%x, BITMAP_PADDR = 0x%x\n", kernelVaddr.vaddrStart, kernelVaddr.vaddrBitmap.bits);
+    //printf("     kernel vaddr: VADDR_START = 0x%x, BITMAP_PADDR = 0x%x\n", kernelVaddr.vaddrStart, kernelVaddr.vaddrBitmap.bits);
+    // 初始化锁
+    lockInit(&kernelPool.lock, "KernelMemLock");
+    lockInit(&userPool.lock, "UserMemLock");
 }
 
 void initMem(void)

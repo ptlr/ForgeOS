@@ -29,7 +29,7 @@ SELECTOR_KERNEL_TEXT   EQU 3 << 3 + 0
 kernelStart:
     call initPage
     add esp, 0xC000_0000
-    mov eax, PAGE_DIR_TABLE_PHY_POS
+    mov eax, KERNEL_PAGE_DIR_TABLE_PADDR
     mov cr3, eax
     mov eax, cr0
     or eax, 0x8000_0000
@@ -57,25 +57,25 @@ initPage:
     mov ecx, 4096
     mov esi, 0
 .clearPdLoop:
-    mov byte [PAGE_DIR_TABLE_PHY_POS + esi], 0
+    mov byte [KERNEL_PAGE_DIR_TABLE_PADDR + esi], 0
     inc esi
     loop .clearPdLoop
 .initPde:
-    mov eax, PAGE_DIR_TABLE_PHY_POS
+    mov eax, KERNEL_PAGE_DIR_TABLE_PADDR
     mov edx, eax
     or eax, PAGE_US_U | PAGE_RW_W | PAGE_P
     add eax, 0x1000
     ; 虚拟地址0~2MB也映射至物理地址0~2MB
-    mov [PAGE_DIR_TABLE_PHY_POS + 0x0000], eax
+    mov [KERNEL_PAGE_DIR_TABLE_PADDR + 0x0000], eax
     ; 第768项指向内核的第一个页表，该页表存放在物理地址0x0020_1000处
-    mov [PAGE_DIR_TABLE_PHY_POS + 0x0C00], eax
+    mov [KERNEL_PAGE_DIR_TABLE_PADDR + 0x0C00], eax
     ; 页目录表最后一个PDE指向页目录表本身
     sub eax, 0x1000
-    mov [PAGE_DIR_TABLE_PHY_POS + 4092], eax
+    mov [KERNEL_PAGE_DIR_TABLE_PADDR + 4092], eax
     ; 创建剩余的内核PDE
     ; 此处创建的原因是便于后面用户进程共享内核
     add eax, 0x2000
-    mov ebx, PAGE_DIR_TABLE_PHY_POS
+    mov ebx, KERNEL_PAGE_DIR_TABLE_PADDR
     mov esi, 769    ; 从769个开始
     mov ecx, 254    ; 内核占用的页目录项共256个，减去页目录表和初始化的第一个页表，余254个
 .kernelPdeLoop:
@@ -86,7 +86,7 @@ initPage:
 ; 共4096个，但目前只需要初始化内核的第一个页表
 ; 映射0~2MB内存的PTE,只需要512个页表项
 .initPt:
-    mov ebx, PAGE_DIR_TABLE_PHY_POS
+    mov ebx, KERNEL_PAGE_DIR_TABLE_PADDR
     add ebx, 0x1000
     mov ecx, 512        ; 需要映射2MB的内容，2MB / 4KB = 512
     xor edx, edx        ; 清空edx,0x0000_0000~0x0020_0000

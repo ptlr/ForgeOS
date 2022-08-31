@@ -1,6 +1,8 @@
 #ifndef KERNEL_CONSTANT_H
 #define KERNEL_CONSTANT_H
 #include "stdint.h"
+// 内核页目录表开始虚拟地址
+#define KERNEL_PAGE_DIR_TABLE_VADDR 0xC0200000
 // GDT描述符属性
 #define DESC_G_4K           1
 #define DESC_D_32           1
@@ -37,8 +39,8 @@
 #define SELECTOR_KERNEL_STACK   SELECTOR_KERNEL_DATA                // 与内核数据段相同
 #define SELECTOR_KERNEL_TEXT    ((3 << 3) + (TI_GDT << 2) + RPL0)
 #define SELECTOR_TSS            ((4 << 3) + (TI_GDT << 2) + RPL0)
-#define SELECTOR_USER_CODE      ((5 << 3) + (TI_GDT << 2) + RPL0)
-#define SELECTOR_USER_DATA      ((6 << 3) + (TI_GDT << 2) + RPL0)
+#define SELECTOR_USER_CODE      ((5 << 3) + (TI_GDT << 2) + RPL3)
+#define SELECTOR_USER_DATA      ((6 << 3) + (TI_GDT << 2) + RPL3)
 #define SELECTOR_USER_STACK     SELECTOR_USER_DATA                  // 与用户数据段相同
 
 // IDT属性
@@ -48,7 +50,7 @@
 #define IDT_DESC_TYPE_32B      0xE // 32位的门
 
 #define IDT_DESC_ATTR_DPL0      ((IDT_DESC_P << 7) + (IDT_DESC_DPL0 << 5) + IDT_DESC_TYPE_32B)
-#define IDT_DESC_ATTR_DPL3      ((IDT_DESC_P << 7) + (IDT_DESC_DPL0 << 5) + IDT_DESC_TYPE_32B)
+#define IDT_DESC_ATTR_DPL3      ((IDT_DESC_P << 7) + (IDT_DESC_DPL3 << 5) + IDT_DESC_TYPE_32B)
 
 #define NULL ((void*)0)
 
@@ -65,6 +67,14 @@
 #define TSS_DESC_D  0
 #define TSS_ATTR_HIGH   (DESC_G_4K << 7) + (TSS_DESC_D << 6) + (DESC_L << 5) + (DESC_AVL << 4) + 0x0
 #define TSS_ATTR_LOW    (DESC_P << 7) + (DESC_DPL_0 << 5) + (DESC_S_SYS << 4) + DESC_S_TYPE_TSS
+
+/* EFLAGS属性 */
+#define EFLAGS_MBS  (1 << 1)
+#define EFLAGS_IF_1 (1 << 9)
+#define EFLAGS_IF_0 (0 << 9)
+// 用于测试用户程序在非系统调用下的IO
+#define EFLAGS_IOPL_3   (3 << 12)
+#define EFLAGS_IOPL_0   (0 << 12)
 /* GDT描述符*/
 struct GdtDesc{
     uint16 limitLowWord;

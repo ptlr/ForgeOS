@@ -3,7 +3,7 @@
 #include "interrupt.h"
 /* 初始化队列 */
 void initIoqueue(struct ioqueue* ioq){
-    lockInit(&ioq->lock);
+    lockInit(&ioq->lock, "IOQ_Lock");
     ioq->producer = NULL;
     ioq->consumer = NULL;
     ioq->head = 0;

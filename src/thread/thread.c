@@ -6,6 +6,9 @@
 #include "stdio.h"
 #include "interrupt.h"
 #include "debug.h"
+#include "process.h"
+#include "console.h"
+
 // 主线程
 struct TaskStruct* kernelMainThread;
 // 就绪队列
@@ -19,7 +22,15 @@ static void kernelThread(thread_func* func, void* funcArg){
     intrEnable();
     func(funcArg);
 }
-
+// 分配PID
+struct Lock pidLock;
+static int16 allocatePid(void){
+    static int16 nextPid = 0;
+    lockAcquire(&pidLock);
+    nextPid++;
+    lockRelease(&pidLock);
+    return nextPid;
+}
 /* 创建线程：
  * 把被执行的函数和它的参数保存到ThreadStack对应的位置
  */
@@ -44,6 +55,7 @@ void createThread(struct TaskStruct* pthread, thread_func func, void* funcArg){
 void initThread(struct TaskStruct* pthread, char* name, int prio){
     memset(pthread, 0, sizeof(*pthread));
     strcpy(pthread->name, name);
+    pthread->pid = allocatePid();
     if(pthread == kernelMainThread){
         pthread->status =  TASK_RUNNING;
     }else{
@@ -81,7 +93,7 @@ static void implementMainThread(void){
      * 因此无需分配新的页作为PCB
      */
     kernelMainThread = runningThread();
-    initThread(kernelMainThread, "kernel-main",31);
+    initThread(kernelMainThread, "Forge Kernel",31);
     // 当前线程不在ready队列中，加入到allThreadList中
     ASSERT(!listFind(&allThreadList, &kernelMainThread->allListTag));
     listAppend(&allThreadList, &kernelMainThread->allListTag);
@@ -104,6 +116,7 @@ void schedule(){
         current->ticks = current->priority;
         current->status = TASK_READY;
     }else{
+        //while(1);
         /* 如果此线程需要某件事发生后才继续运行，不需要加入到就绪队列 */
     }
     // 调度其他任务， ready队列不应该为空
@@ -114,12 +127,15 @@ void schedule(){
     //printf("SCH-BS2\n");
     //while(1);
     //printf("CURR VADDR = 0x%x, NEXT VADDR = 0x%x\n", current, next);
+    // 用户进程新增
+    activateProcess(next);
     switch2(current, next);
 }
 void initThreadEnv(void){
     printf("[10] init thread env\n");
     listInit(&readyThreadList);
     listInit(&allThreadList);
+    lockInit(&pidLock, "PidLock");
     implementMainThread();
 }
 
@@ -138,7 +154,6 @@ void threadBlock(enum TaskStatus status){
 /* 将线程解除阻塞，并将状态设置为status */
 void threadUnblock(struct TaskStruct* thread){
     enum IntrStatus oldStatus = intrDisable();
-    //printf("Thread Status: 0x%d\n", &thread->status);
     ASSERT(thread->status == TASK_BLOCKED || thread->status == TASK_WAITING || thread->status == TASK_HANGING);
     if(thread->status != TASK_READY){
         if(listFind(&readyThreadList, &thread->generalTag)){
@@ -147,6 +162,7 @@ void threadUnblock(struct TaskStruct* thread){
         // 将唤醒的线程放到队列的最前面，使其尽快得到调度
         listPush(&readyThreadList, &thread->generalTag);
         thread->status = TASK_READY;
+    }else{
     }
     setIntrStatus(oldStatus);
 }

@@ -2,6 +2,14 @@
 #define THREAD_THREAD_H
 #include "stdint.h"
 #include "list.h"
+#include "bitmap.h"
+#include "memory.h"
+
+// 导出就绪队列
+extern struct List readyThreadList;
+// 导出所有任务队列
+extern struct List allThreadList;
+
 /*
  *
  */
@@ -24,7 +32,7 @@ struct IntrStack{
     uint32 ESi;
     uint32 EBP;
     uint32 ESP_DUMMY;
-    uint32 RBX;
+    uint32 EBX;
     uint32 EDX;
     uint32 ECX;
     uint32 EAX;
@@ -58,6 +66,8 @@ struct ThreadStack{
 struct TaskStruct{
     // 个内核线程都用自己的内核栈
     uint32* selfKernelStack;
+    // 线程ID
+    int16 pid;
     enum TaskStatus status;
     uint8 priority;
     char name[32];
@@ -71,6 +81,8 @@ struct TaskStruct{
     struct ListElem allListTag;
     // 进程自己页表的虚拟地址
     uint32* pageDir;
+    // 用户进程的虚拟地址
+    struct VaddrPool userProgVaddrPool;
     // 魔术，用于检测栈边界是否溢出
     uint32 stackMagic;
 };
