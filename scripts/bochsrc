@@ -22,7 +22,7 @@ floppy_bootsig_check: disabled=0
 # disk 配置
 ata0: enabled=true, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 ata0-master: type=disk, path="ForgeOS.img", mode=flat
-ata0-slave: type=none
+ata0-slave: type=disk, path="HD128MB.img", mode=flat
 # 日志输出文件
 log: ForgeOS.log
 # 键盘设置
