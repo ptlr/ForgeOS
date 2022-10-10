@@ -84,4 +84,6 @@ struct GdtDesc{
     uint8 LimiHighAttrHigh;
     uint8 baseHighByte;
 };
+// 编程技巧：这里传入的VALUE和STEP肯能会是一个表达式，使用小括号可以保证优先级
+#define DIV_ROUND_UP(VALUE, STEP) ((VALUE + STEP - 1) / (STEP))
 #endif

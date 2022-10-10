@@ -1,21 +1,164 @@
 #include "memory.h"
-#include "stdio.h"
 #include "print.h"
 #include "debug.h"
 #include "string.h"
 #include "console.h"
+#include "constant.h"
 #include "thread.h"
-/*
- *
- */
+#include "interrupt.h"
+// 信息缓冲区
+char msgBuff[128];
 // 获取PDE的index
 #define PDE_INDEX(vaddr) ((vaddr & 0xFFC00000) >> 22)
 // 获取PTE的index
 #define PTE_INDEX(vaddr) ((vaddr & 0x003FF000) >> 12)
 
+// 内核内存块描述符数组
+struct MemBlockDesc kernelMemBlockDescs[MEM_BLOCK_TYPE_COUNT];
+
 struct VaddrPool kernelVaddr;
 // 定义内核内存池和用户内存池
 struct Pool kernelPool, userPool;
+/* 初始化内存块描述符
+ */
+void memBlockDescInit(struct MemBlockDesc* descArray){
+    uint16 descIndex;
+    uint16 blockSize = 16;
+    for(descIndex = 0; descIndex < MEM_BLOCK_TYPE_COUNT; descIndex++){
+        descArray[descIndex].blockSize = blockSize;
+        descArray[descIndex].blocksPerArena = (PAGE_SIZE - sizeof(struct Arena)) / blockSize;
+        listInit(&descArray[descIndex].freeList);
+        blockSize *= 2; // 为下一个内存块做准备
+    }
+}
+/* 返回arena中第index个内存块的地址
+ */
+static struct MemBlock* arena2MemBlock(struct Arena* arena, uint32 index){
+    return (struct MemBlock*)((uint32)arena + sizeof(struct Arena) + index * arena->desc->blockSize);
+}
+// 返回内存块所在的arena地址
+static struct Arena* memBlock2Arena(struct MemBlock* memBlock){
+    // 每个arena都是页，获取地址高20位返回即可
+    return (struct Arena*)((uint32)memBlock & 0xFFFFF000);
+}
+// 在堆中申请size字节内存
+void* sys_malloc(uint32 size){
+    enum PoolFlag PF;
+    struct Pool* memPool;
+    uint32 poolSize;
+    struct MemBlockDesc* descs;
+    struct TaskStruct* currentThread = runningThread();
+    // 根据线程pageDir是否被初始化判断用那个内存池
+    if(currentThread->pageDir == NULL){
+        //logWarning("allock\n");
+        // 内核线程没有初始化pageDir
+        PF = PF_KERNEL;
+        poolSize = kernelPool.poolSize;
+        memPool = &kernelPool;
+        descs = kernelMemBlockDescs;
+    }else{
+        //logWarning("allocu\n");
+        // pageDir被初始化的线程是用户线程
+        PF = PF_USER;
+        poolSize = userPool.poolSize;
+        memPool = &userPool;
+        descs = currentThread->userMemBlockDescs;
+    }
+    // 如果申请的内存大小大于内存池大小返回NULL
+    if (!(size > 0 && size < poolSize)) return NULL;
+    struct Arena* arena;
+    struct MemBlock* memBlock;
+    lockAcquire(&memPool->lock);
+    // 如果申请的内存块超过1024B，直接分配页
+    if(size > 1024){
+        uint32 pageCount = DIV_ROUND_UP(size + sizeof(struct Arena), PAGE_SIZE);
+        arena = mallocPage(PF, pageCount);
+        if(arena != NULL){
+            memset(arena, 0, pageCount * PAGE_SIZE);
+            // 将desc置为NULL
+            arena->desc = NULL;
+            arena->count = pageCount;
+            arena->large = true;
+            lockRelease(&memPool->lock);
+            return arena;
+        }else{
+            lockRelease(&memPool->lock);
+            return NULL;
+        }
+    }
+    // 分配小于等于1024B的内存块
+    uint8 descIndex;
+    // 找到对应的规格的index
+    for(descIndex = 0; descIndex < MEM_BLOCK_TYPE_COUNT; descIndex++){
+        if(size <= descs[descIndex].blockSize) break;
+    }
+    // 若对应的类型的freeList没有可用的内存块，则创建新的arena提供新的内存块
+    if(listIsEmpty(&descs[descIndex].freeList)){
+        arena = mallocPage(PF, 1);
+        if(arena == NULL){
+            lockRelease(&memPool->lock);
+            return NULL;
+        }
+        memset(arena, 0, PAGE_SIZE);
+        arena->desc = &descs[descIndex];
+        arena->large = false;
+        arena->count = descs[descIndex].blocksPerArena;
+        uint32 blockIndex;
+        enum IntrStatus oldStatus = intrDisable();
+        // 将arena拆分称块添加到freeList中
+        for(blockIndex = 0; blockIndex < arena->count; blockIndex++){
+            memBlock = arena2MemBlock(arena, blockIndex);
+            ASSERT(!listFind(&arena->desc->freeList, &memBlock->freeElem));
+            listAppend(&arena->desc->freeList, &memBlock->freeElem);
+        }
+        setIntrStatus(oldStatus);
+    }
+    // 开始分配内存块
+    memBlock = elem2entry(struct MemBlock, freeElem, listPop(&(descs[descIndex].freeList)));
+    memset(memBlock, 0, descs[descIndex].blockSize);
+    arena = memBlock2Arena(memBlock);
+    arena->count--;
+    lockRelease(&memPool->lock);
+    return (void*)memBlock;
+}
+// 回收ptr指向的内存
+void sys_free(void* ptr){
+    ASSERT(ptr != NULL);
+    if (ptr == NULL) return;
+    enum PoolFlag pf;
+    struct Pool* memPool;
+    // 判断是进程还是线程
+    if(runningThread()->pageDir == NULL){
+        pf = PF_KERNEL;
+        memPool = &kernelPool;
+    }else{
+        pf = PF_USER;
+        memPool = &userPool;
+    }
+    lockAcquire(&memPool->lock);
+    struct MemBlock* memBlock = ptr;
+    struct Arena* arena = memBlock2Arena(memBlock);
+    ASSERT(arena->large == 0 || arena->large == 1);
+    if(arena->desc == NULL && arena->large == true){
+        // 大于1024B的内存
+        mfreePage(pf, arena, arena->count);
+    }else{
+        // 小于1024B的内存
+        // 先将内存块放回收到freeList
+        listAppend(&arena->desc->freeList, &memBlock->freeElem);
+        // 判断arena中的内存块是否都是空闲
+        if(++arena->count == arena->desc->blocksPerArena){
+            uint32 blockIndex;
+            for(blockIndex = 0; blockIndex < arena->desc->blocksPerArena; blockIndex++){
+                struct MemBlock* memBlock = arena2MemBlock(arena, blockIndex);
+                ASSERT(listFind(&arena->desc->freeList, &memBlock->freeElem));
+                listRemove(&memBlock->freeElem);
+            }
+            mfreePage(pf, arena, 1);
+        }
+    }
+    lockRelease(&memPool->lock);
+}
 /* 
  * 在pf表示的内存池中分配pageCount个虚拟页，成功返回虚拟页的开始地址，失败返回NULL
  */
@@ -25,6 +168,7 @@ static void* getVaddrPages(enum PoolFlag pf, uint32 pageCount){
     uint32 count = 0;
     // 分配内核空间的虚拟页
     if( PF_KERNEL == pf){
+        lockAcquire(&kernelVaddr.lock);
         bitIndexStart = scanBitmap(&kernelVaddr.vaddrBitmap, pageCount);
         if(-1 == bitIndexStart) return NULL;
         while (count < pageCount)
@@ -32,6 +176,7 @@ static void* getVaddrPages(enum PoolFlag pf, uint32 pageCount){
             setBitmap(&kernelVaddr.vaddrBitmap, bitIndexStart + count++, 1);
         }
         vaddrStart = kernelVaddr.vaddrStart + bitIndexStart * PAGE_SZIE;
+        lockRelease(&kernelVaddr.lock);
         
     }else{
         // 分配用户空间的虚拟页
@@ -47,7 +192,28 @@ static void* getVaddrPages(enum PoolFlag pf, uint32 pageCount){
     }
     return (void*)vaddrStart;
 }
-
+/* 在pf表示的内存池中释放从vaddr开头的pageCount个虚拟页地址
+ * 
+ */
+static void vaddrPagesRemove(enum PoolFlag pf, uint32 vaddr, uint32 pageCount){
+    uint32 bitIndexStart = 0;
+    uint32 mVaddr = vaddr;
+    uint32 count = 0;
+    if(pf == PF_KERNEL){
+        bitIndexStart = (mVaddr - kernelVaddr.vaddrStart) / PAGE_SIZE;
+        while (count < pageCount)
+        {
+            setBitmap(&kernelVaddr.vaddrBitmap, bitIndexStart + count, 0);
+            count++;
+        }
+    }else{
+        struct TaskStruct* currentThread = runningThread();
+        bitIndexStart = (mVaddr - currentThread->userProgVaddrPool.vaddrStart) / PAGE_SIZE;
+        while(count < pageCount){
+            setBitmap(&currentThread->userProgVaddrPool.vaddrBitmap, bitIndexStart + count++, 0);
+        }    
+    }
+}
 /* 分配内存时，需要关联虚拟地址和物理地址，此时，需要更新页目录表（PD）和页表（PT）
  * 由于操作系统只有一个页目录表（PD）和至多1024个页表（PT）
  */
@@ -84,14 +250,28 @@ static void* palloc(struct Pool* memPool){
     uint32 pagePaddr = ((bitIndex * PAGE_SZIE) + memPool->phyaddrStart);
     return (void*)pagePaddr;
 }
+/* 将物理地址pagePaddr回收到物理内存池
+ *
+ */
+static void pfree(uint32 pagePaddr){
+    struct Pool* memPool;
+    uint32  bitIndex = 0;
+    if(pagePaddr >= userPool.phyaddrStart){
+        memPool = &userPool;
+    }else{
+        memPool = &kernelPool;
+    }
+    bitIndex = (pagePaddr - memPool->phyaddrStart) / PAGE_SIZE;
+    setBitmap(&memPool->bitmap, bitIndex, 0);
+}
+
 // 向页目录表中添加虚拟内存与物理地址的映射
 static void addPageTable(void* vaddr, void* paddr){
-    uint32 mVaddr = (uint32)vaddr, pagePaddr = (uint32)paddr;
+    uint32 mVaddr = (uint32)vaddr;
+    uint32 pagePaddr = (uint32)paddr;
     uint32* pde = getPdePtr(mVaddr);
     
     uint32* pte = getPtePtr(mVaddr);
-    //printf("PDE = 0x%x\n", *pde);
-    //printf("PTE = 0x%x\n", *pte);
     // 判断目录页是否存在，如果已存在表示该表已存在
     if(*pde & 0x00000001){
         // 如果pte不存在
@@ -112,12 +292,24 @@ static void addPageTable(void* vaddr, void* paddr){
         *pte = pagePaddr | PAGE_US_U | PAGE_RW_W | PAGE_P_1;
     }
 }
+/* 去掉页表中虚拟地址vaddr的映射，只去掉vaddr对应的pte
+ */
+static void pageTablePteRemove(uint32 vaddr){
+    uint32* ptePtr = getPtePtr(vaddr);
+    /* 将pte中的P位置0
+       编程技巧：&是按位和，不能使用PAGE_P_1,否则 1 & 0 = 0,导致ptePtr指向的数据错误
+     */
+    *ptePtr &= ~PAGE_P_1;
+    asm volatile ("invlpg %0"::"m" (vaddr):"memory");//更新TLB, invlpg更新单条虚拟地址条目
+}
 // 分配pageCount个页空间，成功返回起始虚拟地址，失败返回NULL
 void* mallocPage(enum PoolFlag pf, uint32 pageCount){
     void* vaddrStart = getVaddrPages(pf, pageCount);
     if(vaddrStart == NULL) return NULL;
-    uint32 vaddr =  (uint32)vaddrStart, count = pageCount;
+    uint32 vaddr =  (uint32)vaddrStart;
+    uint32 count = pageCount;
     struct Pool* memPool = pf & PF_KERNEL ? &kernelPool : &userPool;
+    //logWarning("PRE_WAIT\n");
     while (count--)
     {
         void* pagePaddr = palloc(memPool);
@@ -126,6 +318,43 @@ void* mallocPage(enum PoolFlag pf, uint32 pageCount){
         vaddr += PAGE_SZIE;
     }
     return vaddrStart;
+}
+// 在pf表示的内存池中释放vaddr开始的pageCount个物理页
+// ToDo: 这个函数可以优化，此处去掉了书中的ASSERT语句
+void mfreePage(enum PoolFlag pf, void* vaddr, uint32 pageCount){
+    uint32 pagePaddr;
+    uint32 mVaddr = (uint32)vaddr;
+    uint32 count = 0;
+    ASSERT(pageCount >= 1 && mVaddr % PAGE_SIZE == 0);
+    pagePaddr = getVaddrMapedPaddr(mVaddr);
+    // 确保释放的物理内存在低1MB+高内核1MB + 4KB页目录表和第一个页表4KB
+    ASSERT((pagePaddr % PAGE_SIZE) == 0 && pagePaddr >= 0x202000);
+    // 判断vaddr对应的是虚拟用户地址还是内核地址
+    if(pagePaddr >= userPool.phyaddrStart){
+        // 用户内存池
+        mVaddr -= PAGE_SIZE;
+        while (count < pageCount)
+        {
+            mVaddr += PAGE_SIZE;
+            pagePaddr = getVaddrMapedPaddr(mVaddr);
+            pfree(pagePaddr);
+            pageTablePteRemove(mVaddr);
+            count++;
+        }
+        vaddrPagesRemove(pf, (uint32)vaddr, pageCount);
+    }else{
+        // 内核内存池
+        mVaddr -= PAGE_SIZE;
+        while (count < pageCount)
+        {
+            mVaddr += PAGE_SIZE;
+            pagePaddr = getVaddrMapedPaddr(mVaddr);
+            pfree(pagePaddr);
+            pageTablePteRemove(mVaddr);
+            count++;
+        }
+        vaddrPagesRemove(pf,(uint32)vaddr, pageCount);
+    }
 }
 // 分配内核物理页
 void* allocKernelPages(uint32 pageCount){
@@ -183,7 +412,7 @@ uint32 getVaddrMapedPaddr(uint32 vaddr){
 }
 static void initMemPool(uint32 maxMemSize)
 {
-    printf("    *init memory pool\n");
+    putStr("    *init memory pool\n");
     uint32 sizeMB = maxMemSize / 1024 / 1024;
     if(sizeMB > 1024){
         putStr("Memory size Biger than 1024MiB.");
@@ -220,13 +449,18 @@ static void initMemPool(uint32 maxMemSize)
     userPool.poolSize = userFreePages * PAGE_SZIE;
     userPool.bitmap.length = userFreePages / 8;
     userPool.bitmap.bits = (void*)USER_PMEM_BITMAP_VADDR;
+    memset(msgBuff, '\0', 128);
+    format(msgBuff, "     kernel pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",(uint32)kernelPool.phyaddrStart, (uint32)kernelPool.bitmap.bits);
     // 输出简单的信息
-    printf("     kernel pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",kernelPool.phyaddrStart, kernelPool.bitmap.bits);
-    printf("     user   pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",userPool.phyaddrStart, userPool.bitmap.bits);
+    putStr(msgBuff);
+    memset(msgBuff, '\0', 128);
+    format(msgBuff, "     user   pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",userPool.phyaddrStart, userPool.bitmap.bits);
+    putStr(msgBuff);
     // 初始化bitmap
     initBitmap(&kernelPool.bitmap);    
     initBitmap(&userPool.bitmap);
     //初始化内核对应的虚拟地址池
+    lockInit(&kernelVaddr.lock,"KernelVaddrLock");
     kernelVaddr.vaddrStart = KERNEL_VADDR_START;
     kernelVaddr.vaddrBitmap.length = kernelPool.bitmap.length;
     kernelVaddr.vaddrBitmap.bits = (void*)KERNEL_VMEM_BITMAP_VADDR;
@@ -238,7 +472,7 @@ static void initMemPool(uint32 maxMemSize)
 
 void initMem(void)
 {
-    printf("[09] init memory\n");
+    putStr("[10] init memory\n");
     int count = *((uint32*)ARDS_ENTRY_COUNT_PADDR);
     struct ARDS ards[count];
     uint32 maxIndex = 0;
@@ -256,7 +490,9 @@ void initMem(void)
        uint2HexStr(bl, ards[index].baseVaddrLow, 8);
        uint2HexStr(lh, ards[index].lengthHigh, 8);
        uint2HexStr(ll, ards[index].lengthLow, 8);
-       printf("     BASE = 0x%s%s, LENGHT = 0x%s%s, TYPE = %d\n", bh, bl, lh, ll, ards[index].type);
+       memset(msgBuff, '\0', 128);
+       format(msgBuff, "     BASE = 0x%s%s, LENGHT = 0x%s%s, TYPE = %d\n", bh, bl, lh, ll, ards[index].type);
+       putStr(msgBuff);
        length = (((uint64)ards[index].lengthHigh) << 32) + (uint64)ards[index].lengthLow;
        if(length > maxLength){
            maxLength = length;
@@ -267,4 +503,6 @@ void initMem(void)
      * 此次学习和开的发操作系统为32位，即使在4GiB的也可用32位数表示，直接传入LengthLow即可。
      */
     initMemPool(ards[maxIndex].lengthLow);
+    // 初始化内存块描述符数组
+    memBlockDescInit(kernelMemBlockDescs);
 }

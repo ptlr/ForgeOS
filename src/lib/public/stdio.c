@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "string.h"
 #include "interrupt.h"
+#include "syscall.h"
 /* 整型转换成字符（Integer to ASCII）
  *
  */
@@ -43,6 +44,10 @@ uint32 vsprintf(char* str, const char* format, va_list ap)
         {
         case 'd':
             argInt = va_arg(ap, int);
+            if(argInt < 0){
+                argInt = 0 - argInt;
+                *bufPtr++ = '-'; 
+            }
             itoa(argInt, &bufPtr, 10);
             indexChar = *(++indexPtr);
             break;
@@ -76,9 +81,8 @@ uint32 printf(const char* format, ...)
      * va_start把args地址指向format,va_args把ap+4后返回
      */
     va_start(args, format);
-    char buf[1024] = {0};
-    vsprintf(buf, format, args);
+    char buff[1024] = {0};
+    vsprintf(buff, format, args);
     va_end(args);
-    putStr(buf);
-    return strlen(buf);
+    return write(buff);
 }

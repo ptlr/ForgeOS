@@ -3,6 +3,7 @@
 #include "print.h"
 #include "debug.h"
 #include "stdio.h"
+#include "console.h"
 // 初始化bitmap
 void initBitmap(struct Bitmap* bitmap)
 {
@@ -73,10 +74,11 @@ void setBitmap(struct Bitmap* bitmap, uint32 bitIndex, int8 value)
 {
     ASSERT(value == 0 || value == 1);
     uint32 byteIndex = bitIndex / 8; //向下取整用于获取比特对应的index
-    uint32 bitOdd = bitIndex % 8; // 取余，用于标识比特内的index
+    uint8 bitOdd = bitIndex % 8; // 取余，用于标识比特内的index
+    uint8 opVal = (BITMAP_MASK << bitOdd);
     if(value == 1){
-        bitmap->bits[byteIndex] |= BITMAP_MASK << bitOdd;
+        bitmap->bits[byteIndex] |= opVal;
     }else if(value == 0){
-        bitmap->bits[byteIndex] &= BITMAP_MASK << bitOdd;
+        bitmap->bits[byteIndex] &= ~opVal;
     }
 }

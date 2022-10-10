@@ -1,3 +1,5 @@
+#ifndef KERNEL_INIT_H
+#define KERNEL_INIT_H
 #include "print.h"
 #include "interrupt.h"
 
@@ -5,3 +7,4 @@
  *
  */
 void init(void);
+#endif

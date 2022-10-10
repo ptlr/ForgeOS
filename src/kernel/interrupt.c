@@ -122,15 +122,15 @@ void initIdt()
     initException();
     initPic();
     //while (1);
-    printf("    *IDT VADDR: %x\n",(uint32)&IDT);
+    //printf("    *IDT VADDR: %x\n",(uint32)&IDT);
     //uint64 preAddr = ;
     /*加载IDT
      * 先把32位地址转换成uint32
      * 再把uint32转化成uint64
      */
-    printf("    *IDT SIZE: %d\n", sizeof(IDT));
+    //printf("    *IDT SIZE: %d\n", sizeof(IDT));
     uint64 idtOperand = ((uint64)((uint32)&IDT) << 16) | (sizeof(IDT) - 1);
-    printf("    *IDTR: %x%x\n", (uint32)(idtOperand >> 32), (uint32)idtOperand);
+    //printf("    *IDTR: %x%x\n", (uint32)(idtOperand >> 32), (uint32)idtOperand);
     asm volatile ("lidt %0"::"m"(idtOperand));
 }
 uint32 getEflags(void)

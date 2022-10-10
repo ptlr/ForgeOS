@@ -102,6 +102,7 @@ void processExecute(void* fileName, char* name){
     createUserVaddrBitmap(thread);
     createThread(thread, startProcess, fileName);
     thread->pageDir = createUserPageDir();
+    memBlockDescInit(thread->userMemBlockDescs);
     enum IntrStatus oldStatus = intrDisable();
     ASSERT(!listFind(&readyThreadList,&thread->generalTag))
     listAppend(&readyThreadList, &thread->generalTag);

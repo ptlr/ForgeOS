@@ -50,3 +50,15 @@
 uint32 getpid(){
     return _syscall0(SYS_GETPID);
 }
+
+uint32 write(char* str){
+    return _syscall1(SYS_WRITE, str);
+}
+// 申请size字节的内存
+void* malloc(uint32 size){
+    return (void*)_syscall1(SYS_MALLOC, size);
+}
+// 释放指针指向的内存
+void free(void* ptr){
+    return _syscall1(SYS_FREE, ptr);
+}

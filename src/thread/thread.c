@@ -15,7 +15,8 @@ struct TaskStruct* kernelMainThread;
 struct List readyThreadList;
 // 所有任务队列
 struct List allThreadList;
-
+// 定义
+struct ListElem* generalTag;
 /*由kernelThread去执行function(funcArg)*/
 static void kernelThread(thread_func* func, void* funcArg){
     // 执行前开中断，避免其他线程无法被调度
@@ -76,7 +77,6 @@ void initThread(struct TaskStruct* pthread, char* name, int prio){
 struct TaskStruct* startThread(char* name, int prio, thread_func func, void* funcArg){
     // PCB都放在内核空间
     struct TaskStruct* thread = allocKernelPages(1);
-    //printf("THREAD PCB VADDR: 0x%x\n", (uint32)thread);
     initThread(thread, name, prio);
     createThread(thread, func, funcArg);
     // 确保线程不在就绪队列中
@@ -105,9 +105,6 @@ struct TaskStruct* runningThread(void){
     return (struct TaskStruct*)(esp & 0xFFFFF000);
 }
 void schedule(){
-    //printf("SCH-IN\n");
-    //logWarning("SCH-IN\n");
-    // 在切换线程的过程中，关闭中断，保证切换的过程中不受影响。
     ASSERT(getIntrStatus() == INTR_OFF);
     struct TaskStruct* current = runningThread();
     if(current->status == TASK_RUNNING){
@@ -124,15 +121,11 @@ void schedule(){
     struct ListElem* threadTag = listPop(&readyThreadList);
     struct TaskStruct* next = elem2entry(struct TaskStruct, generalTag, threadTag);
     next->status =  TASK_RUNNING;
-    //printf("SCH-BS2\n");
-    //while(1);
-    //printf("CURR VADDR = 0x%x, NEXT VADDR = 0x%x\n", current, next);
-    // 用户进程新增
     activateProcess(next);
     switch2(current, next);
 }
 void initThreadEnv(void){
-    printf("[10] init thread env\n");
+    putStr("[10] init thread env\n");
     listInit(&readyThreadList);
     listInit(&allThreadList);
     lockInit(&pidLock, "PidLock");

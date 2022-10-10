@@ -83,12 +83,15 @@ struct TaskStruct{
     uint32* pageDir;
     // 用户进程的虚拟地址
     struct VaddrPool userProgVaddrPool;
+    // 用户进程内存块描述符
+    struct MemBlockDesc userMemBlockDescs[MEM_BLOCK_TYPE_COUNT];
     // 魔术，用于检测栈边界是否溢出
     uint32 stackMagic;
 };
-/* ToDo::目前意义不明
+/* 向外部导出符号
+ * ToDo::目前意义不明
  */
-struct ListElem* generalTag;
+extern struct ListElem* generalTag;
 // 用于初始化线程环境
 void initThreadEnv(void);
 // 导入外部函数

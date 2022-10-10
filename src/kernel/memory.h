@@ -15,8 +15,11 @@
 
 // 这里的地址需要十分注意，错误的地址会导致string库调用setmem时引发GP（一般性保护异常）
 // 内核虚拟地址开始的位置,此处需要加上低1MB和高1MB内存空间
-#define KERNEL_VADDR_START 0xC0200000 
-#define USER_VADDR_START 0x00000000
+#define KERNEL_VADDR_START 0xC0200000
+/* 前面的虚拟地址可以用来 保存bss，堆以及动态链接库等等
+ * 
+ */ 
+#define USER_VADDR_START 0x8048000
 // 内存信息个数入口
 #define ARDS_ENTRY_COUNT_PADDR 0x00007E00
 // 内存信息表地址
@@ -54,7 +57,10 @@ enum PoolFlag{
 #define PAGE_US_U   4   // U/S属性位。用户级 
 // 虚拟地址结构
 struct VaddrPool
-{
+{   /* 在内核中申请 虚拟地址时出现申请到的虚拟地址不可用的情况
+     * 加锁，用来控制虚拟地址资源的独立访问
+     */ 
+    struct Lock lock;
     struct Bitmap vaddrBitmap;
     uint32 vaddrStart;
 };
@@ -67,13 +73,44 @@ struct Pool
     uint32 phyaddrStart;
     uint32 poolSize;
 };
-// 并向外部导出标号
+/* 内存块类型数量
+ * 16B, 32B, 64B, 128B, 256B, 512B, 1024B共7种规格
+ */
+#define MEM_BLOCK_TYPE_COUNT 7
+/* 内存块 */
+struct MemBlock{
+    struct ListElem freeElem;
+};
+/* 内存块描述符 */
+struct MemBlockDesc{
+    // 内存块大小
+    uint32 blockSize;
+    // 本arena可容纳的内存块大小
+    uint32 blocksPerArena;
+    // 目前可用的内存块链表
+    struct List freeList;
+};
+/* 内存仓库 */
+struct Arena{
+    // arena关联的MemBlockDesc
+    struct MemBlockDesc* desc;
+    /* 如果large为true,count表示页框数，否则表示内存块数量 */
+    uint32 count;
+    bool large;
+};
+// 向外部导出标号
 extern struct Pool kernelPool, userPool;
-
+void memBlockDescInit(struct MemBlockDesc* descArray);
+// 在堆中申请size字节内存
+void* sys_malloc(uint32 size);
+void sys_free(void* ptr);
+// 回收ptr指向的内存
+void sys_free(void* ptr);
 void initMem(void);
 uint32* getPdePtr(uint32 vaddr);
 uint32* getPtePtr(uint32 vaddr);
 void* mallocPage(enum PoolFlag pf, uint32 pageCount);
+void mfreePage(enum PoolFlag pf, void* vaddr, uint32 pageCount);
 void* mallocAPage(enum PoolFlag pf, uint32 vaddr);
 // 获取虚拟地址（VADDR）映射的 物理地址（PADDR）
 uint32 getVaddrMapedPaddr(uint32 vaddr);
