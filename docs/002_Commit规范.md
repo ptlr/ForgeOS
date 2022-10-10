@@ -33,6 +33,7 @@ Header部分只有一行，包含三个字段：`type`(必须)、`scope`(可选)
 | ref      | 重构代码，即不新增功能，也不修改bug的代码变动 |       |
 | env      | 项目环境的变动                  |       |
 | backup   | 备份的文件                    |       |
+| assets   | 材料的更改，比如图片               |       |
 
 其中，feat、perf和fix会被写入Change log中。
 
