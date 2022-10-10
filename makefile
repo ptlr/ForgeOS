@@ -1,10 +1,12 @@
 CC=gcc
 # C flags
-CFLAGS= -g -c -m32
+CFLAGS	 = -g -c -m32
 CFLAGS	+= -nostdlib
 CFLAGS	+= -fno-builtin
 CFLAGS	+= -fno-stack-protector
 CFLAGS	+= -Wall
+# 去掉函数前面的下划线
+#CFLAGS  += -fleading-underscore --no-leading-underscore
 #CFLAGS	+= -o0
 #CFLAGS	+= -Wstrict-prototypes
 #CFLAGS	+= -Wmissing-prototypes
@@ -17,7 +19,6 @@ ASFLAGS= -f elf32
 IMG_SECTOS = 131072
 IMG = ForgeOS.img
 VM = bochs
-DVM = bochsdbg.exe
 DIR_SRC = ./src
 DIR_INC = ./src/include/
 DIR_BUILD = ./build/
@@ -61,7 +62,7 @@ all: $(DIR_BUILD) $(BIN) $(IMG)
 	
 # build dir
 $(DIR_BUILD):
-	mkdir $(DIR_BUILD)
+	mkdir -p $(DIR_BUILD)
 
 $(DIR_BUILD)/kernel.bin : $(OBJ) 
 
@@ -110,7 +111,7 @@ $(DIR_BUILD)bitmap.c.o:$(DIR_KERNEL_LIB)bitmap.c $(DIR_KERNEL_LIB)bitmap.h
 $(DIR_BUILD)memory.c.o: $(DIR_KERNEL)/memory.c $(DIR_KERNEL_LIB)/print.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译thread
-$(DIR_BUILD)thread.c.o:$(DIR_THREAD)/thread.c $(DIR_KERNEL_LIB)
+$(DIR_BUILD)thread.c.o:$(DIR_THREAD)/thread.c $(DIR_KERNEL_LIB)/*
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译list
 $(DIR_BUILD)list.c.o:$(DIR_KERNEL_LIB)/list.c $(DIR_KERNEL_LIB)/list.h
