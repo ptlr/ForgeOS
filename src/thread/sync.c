@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "interrupt.h"
 #include "thread.h"
-#include "print.h"
+#include "printk.h"
 #include "string.h"
 
 /*初始信号量*/
@@ -16,7 +16,6 @@ void semaDown(struct Semaphore* sema){
     // 原子操作
     enum IntrStatus oldStatus = intrDisable();
     while(sema->value == 0){ // 如果为0表示锁被其他线程持有
-        //putStr("Wait Test\n");
         // 当前线程不应该在等待队列中
         if(listFind(&sema->waitList, &runningThread()->generalTag)){
             PANIC("Sema down: thread blocked has been in wait list\n");

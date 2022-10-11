@@ -2,7 +2,7 @@
 #include "thread.h"
 #include "constant.h"
 #include "string.h"
-#include "print.h"
+#include "printk.h"
 #include "console.h"
 // 最开始的TSS
 static struct TSS tss;
@@ -23,7 +23,7 @@ static struct GdtDesc makeGdtDesc(uint32* descAddr, uint32 limit, uint8 attrLow,
 }
 /* 初始化TSS */
 void initTss(){
-    putStr("[13] init TSS\n");
+    printk("[13] init TSS\n");
     uint32 tssSize = sizeof(tss);
     // 清空TSS
     memset(&tss, 0, tssSize);

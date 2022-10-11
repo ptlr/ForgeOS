@@ -1,6 +1,6 @@
 #include "init.h"
 #include "debug.h"
-#include "print.h"
+#include "printk.h"
 #include "stdint.h"
 #include "interrupt.h"
 #include "string.h"
@@ -26,8 +26,7 @@ void uProcA(void);
 void uProcB(void);
 void kernelMain(void)
 {
-    putStr("\n\n\n\n");
-    putStr(MSG_KERNEL);
+    printkf("%s\n\n\n\n", MSG_KERNEL);
     init();
     intrEnable();
     processExecute(uProcA, "UPA");

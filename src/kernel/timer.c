@@ -1,6 +1,6 @@
 #include "timer.h"
 #include "io.h"
-#include "print.h"
+#include "printk.h"
 #include "thread.h"
 #include "debug.h"
 #include "interrupt.h"
@@ -32,7 +32,7 @@ static void setFrequency(uint8 counterPort, uint8 counterNo, uint8 rwl, uint8 mo
 
 void initTimer()
 {
-    putStr("[09] init timer\n");
+    printk("[09] init timer\n");
     uint16 countVal = FREQUENCY_MAX / FREQUENCY_24Hz;
     setFrequency(PORT_COUNTER0, SC_COUNTER0, RWL_LOW_HIGH, COUNTOR_MODE2, countVal);
     // 注册时钟中断处理函数

@@ -8,7 +8,7 @@
 #include "syscall-init.h"
 void init(void)
 {
-    putStr("[06] start init\n");
+    printk("[06] start init\n");
     initIdt(); // IDT需要最先初始化
     initTimer();
     initMem();

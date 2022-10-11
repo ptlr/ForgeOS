@@ -20,8 +20,10 @@ void setCursor(uint16 cursor);
 uint8 setColor(uint8 color);
 void cPutChar(uint8 color, uint8 asciiCh);
 void putChar(uint8 asciiCh);
-void putStr(const char * str);
 /*支持二进制、8进制、10进制、16进制*/
 void putNum(uint32 num, uint32 base);
 void uint2HexStr(char* buff, uint32 num, uint32 width);
+//prink留在之后待用
+void printk(const char* str);
+void printkf(const char* fmt, ...);
 #endif

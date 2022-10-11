@@ -2,7 +2,7 @@
 #include "interrupt.h"
 #include "io.h"
 #include "stdint.h"
-#include "print.h"
+#include "printk.h"
 #include "debug.h"
 #include "ioqueue.h"
 
@@ -180,7 +180,7 @@ static void intrKeyboardHandler(){
     return;
 }
 void initKeyboard(){
-    putStr("[12] init keyboard\n");
+    printk("[12] init keyboard\n");
     initIoqueue(&KBD_BUFFER);
     registerHandler(INTR_0x21_KEYBOARD, intrKeyboardHandler);
 }

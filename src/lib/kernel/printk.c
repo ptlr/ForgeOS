@@ -1,10 +1,12 @@
-#include "print.h"
+#include "printk.h"
 #include "string.h"
 #include "debug.h"
 #include "stdio.h"
 #include "interrupt.h"
 #include "io.h"
 #include "constant.h"
+#include "stdarg.h"
+#include "stdio.h"
 
 uint8 displayColor = COLOR_FG_GREEN | COLOR_FG_BLUE;
 uint16 getCursor(void){
@@ -62,14 +64,6 @@ void putNum(uint32 num, uint32 base){
     }
     
 }
-void putStr(const char * str){
-    int index = 0;
-    while (str[index] != '\0')
-    {
-        cPutChar(displayColor, (char)str[index]);
-        index++;
-    } 
-}
 
 void uint2HexStr(char* buff, uint32 num, uint32 width)
 {
@@ -85,4 +79,21 @@ void uint2HexStr(char* buff, uint32 num, uint32 width)
         }
         buffIndex--;
     }
+}
+void printk(const char* str){
+    int index = 0;
+    while (str[index] != '\0')
+    {
+        cPutChar(displayColor, (char)str[index]);
+        index++;
+    }   
+}
+
+void printkf(const char* fmt, ...){
+    va_list args;
+    va_start(args, format);
+    char buffer[1024] = {0};
+    format(buffer, fmt, args);
+    va_end(args);
+    printk(buffer);
 }

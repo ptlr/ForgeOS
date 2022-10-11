@@ -2,7 +2,7 @@
 #include "constant.h"
 #include "interrupt.h"
 #include "stdio.h"
-#include "print.h"
+#include "printk.h"
 
 static struct GateDesc IDT[IDT_DESC_CNT];
 /* 这里的intrEntryTable是中断入口地址，中断对应的函数的地址被存放到了这里
@@ -29,22 +29,22 @@ static void generalIntrHandler(uint8 intrVecNum)
         return;
     }
     setColor(COLOR_BG_DARK | COLOR_FG_RED);
-    putStr("\n================================================================================");
-    putStr("                                EXCEPTION OCCUR!\n");
-    putStr("--------------------------------------------------------------------------------");
-    putStr("INTR NUM : 0x");putNum((uint32)intrVecNum, 16);
-    putStr("\nINTR NAME: ");
-    putStr(intrNames[intrVecNum]);
-    putStr("\n");
-    putStr("INTR INFO:\n");
+    printk("\n================================================================================");
+    printk("                                EXCEPTION OCCUR!\n");
+    printk("--------------------------------------------------------------------------------");
+    printk("INTR NUM : 0x");putNum((uint32)intrVecNum, 16);
+    printk("\nINTR NAME: ");
+    printk(intrNames[intrVecNum]);
+    printk("\n");
+    printk("INTR INFO:\n");
     // 对缺页异常做简单的处理
     if(intrVecNum == 14){
         int pageFaultVaddr = 0;
         asm ("movl %%cr2, %0" : "=r"(pageFaultVaddr));
-        putStr("    Page fault vaddr is 0x");putNum(pageFaultVaddr,16);
+        printk("    Page fault vaddr is 0x");putNum(pageFaultVaddr,16);
         putChar('\n');
     }
-    putStr("================================================================================"); 
+    printk("================================================================================"); 
     while(1);
 }
 
@@ -94,7 +94,7 @@ static void initException(void){
 }
 static void initPic(void)
 {
-    putStr("[08] init PIC\n");
+    printk("[08] init PIC\n");
     // 初始化主片
     outb(PIC_M_CTRL, 0x11); // ICW1：边缘触发，级联8259，需要ICW4
     outb(PIC_M_DATA, 0x20); // ICW2: 起始中断号为0x20，即IR0~IR7为中断0x20~0x27
@@ -117,7 +117,7 @@ static void initPic(void)
 }
 void initIdt()
 {
-    putStr("[07] init IDT\n");
+    printk("[07] init IDT\n");
     initIdtDesc();
     initException();
     initPic();

@@ -2,7 +2,7 @@
 #define INTERRUPT_H
 #include "io.h"
 #include "stdint.h"
-#include "print.h"
+#include "printk.h"
 #include "constant.h"
 
 #define PIC_M_CTRL   0x20  // 主片控制端口

@@ -46,7 +46,7 @@ KERNEL_SEEK			= $(shell expr $(LOADER_SECTOR_CNT) + 1)
 KERNEL_SECTOR_CNT	= 128
 DIR_SCRIPTS = ./scripts
 
-OBJ_NAMES = kernel.o print.a.o interrupt.a.o print.c.o main.o interrupt.c.o\
+OBJ_NAMES = kernel.o printk.a.o interrupt.a.o printk.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
 		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o keyboard.c.o \
 		ioqueue.c.o tss.c.o process.c.o syscall.c.o syscall-init.c.o
@@ -79,7 +79,7 @@ $(DIR_BUILD)kernel.o : $(DIR_KERNEL)/kernel.asm $(DIR_INC)/constant.inc
 	$(AS) $(ASFLAGS) -I $(DIR_INC) -o $@ $<
 
 # 编译print
-$(DIR_BUILD)print.a.o: $(DIR_KERNEL_LIB)/print.asm $(DIR_INC)/constant.inc
+$(DIR_BUILD)printk.a.o: $(DIR_KERNEL_LIB)/printk.asm $(DIR_INC)/constant.inc
 	$(AS) $(ASFLAGS) -o $@ $<
 # 编译interrupt.a.o
 $(DIR_BUILD)interrupt.a.o:$(DIR_KERNEL)/interrupt.asm $(DIR_INC)/*
@@ -87,8 +87,8 @@ $(DIR_BUILD)interrupt.a.o:$(DIR_KERNEL)/interrupt.asm $(DIR_INC)/*
 # 编译switch2.a.o
 $(DIR_BUILD)switch2.a.o:$(DIR_THREAD)/switch2.asm $(DIR_INC)/*
 	$(AS) $(ASFLAGS) -o $@ $<
-# 编译print.c
-$(DIR_BUILD)print.c.o:$(DIR_KERNEL_LIB)/print.c $(DIR_KERNEL_LIB)/print.h
+# 编译printk.c
+$(DIR_BUILD)printk.c.o:$(DIR_KERNEL_LIB)/printk.c $(DIR_KERNEL_LIB)/printk.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译interrupt.c
 $(DIR_BUILD)interrupt.c.o:$(DIR_KERNEL)/interrupt.c $(DIR_INC)/*
@@ -108,7 +108,7 @@ $(DIR_BUILD)stdio.c.o:$(DIR_PUBLIC_LIB)/stdio.c $(DIR_INC)/*
 # 编译bitmap
 $(DIR_BUILD)bitmap.c.o:$(DIR_KERNEL_LIB)bitmap.c $(DIR_KERNEL_LIB)bitmap.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
-$(DIR_BUILD)memory.c.o: $(DIR_KERNEL)/memory.c $(DIR_KERNEL_LIB)/print.h
+$(DIR_BUILD)memory.c.o: $(DIR_KERNEL)/memory.c $(DIR_KERNEL_LIB)/printk.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译thread
 $(DIR_BUILD)thread.c.o:$(DIR_THREAD)/thread.c $(DIR_KERNEL_LIB)/*
@@ -141,7 +141,7 @@ $(DIR_BUILD)syscall.c.o : $(DIR_USER_LIB)/syscall.c $(DIR_USER_LIB)/syscall.h
 $(DIR_BUILD)syscall-init.c.o : $(DIR_USER)/syscall-init.c $(DIR_USER)/syscall-init.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # kernel main
-$(DIR_BUILD)main.o: $(DIR_KERNEL)/main.c $(DIR_INC)/* $(DIR_KERNEL_LIB)/print.h	
+$(DIR_BUILD)main.o: $(DIR_KERNEL)/main.c $(DIR_INC)/* $(DIR_KERNEL_LIB)/printk.h	
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # kernel.bin
 $(DIR_BUILD)kernel.bin : $(OBJ)

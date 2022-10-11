@@ -1,6 +1,6 @@
 #include "syscall-init.h"
 #include "string.h"
-#include "print.h"
+#include "printk.h"
 #include "syscall.h"
 #include "thread.h"
 #include "console.h"
@@ -14,7 +14,7 @@ uint32 sys_getpid(void){
 }
 /*初始化系统调用*/
 void syscallInit(void){
-    putStr("[14] init system call\n");
+    printk("[14] init system call\n");
     syscallTable[SYS_GETPID] = sys_getpid;
     syscallTable[SYS_WRITE]  = sys_write;
     syscallTable[SYS_MALLOC] = sys_malloc;

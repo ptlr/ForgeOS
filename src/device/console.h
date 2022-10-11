@@ -7,4 +7,5 @@ void consoleInit(void);
 void consolePrint(const char* msg);
 /*通过中断打印数字*/
 void consoleNum(uint32 num, int base);
+void consolePrintf(const char* format, ...);
 #endif

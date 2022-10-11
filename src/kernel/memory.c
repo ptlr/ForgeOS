@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "print.h"
+#include "printk.h"
 #include "debug.h"
 #include "string.h"
 #include "console.h"
@@ -412,10 +412,10 @@ uint32 getVaddrMapedPaddr(uint32 vaddr){
 }
 static void initMemPool(uint32 maxMemSize)
 {
-    putStr("    *init memory pool\n");
+    printk("    *init memory pool\n");
     uint32 sizeMB = maxMemSize / 1024 / 1024;
     if(sizeMB > 1024){
-        putStr("Memory size Biger than 1024MiB.");
+        printk("Memory size Biger than 1024MiB.");
         maxMemSize = 1024 * 1024 * 1024;
     }
     /* 计算出可用的内存数：
@@ -452,10 +452,10 @@ static void initMemPool(uint32 maxMemSize)
     memset(msgBuff, '\0', 128);
     format(msgBuff, "     kernel pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",(uint32)kernelPool.phyaddrStart, (uint32)kernelPool.bitmap.bits);
     // 输出简单的信息
-    putStr(msgBuff);
+    printk(msgBuff);
     memset(msgBuff, '\0', 128);
     format(msgBuff, "     user   pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",userPool.phyaddrStart, userPool.bitmap.bits);
-    putStr(msgBuff);
+    printk(msgBuff);
     // 初始化bitmap
     initBitmap(&kernelPool.bitmap);    
     initBitmap(&userPool.bitmap);
@@ -472,7 +472,7 @@ static void initMemPool(uint32 maxMemSize)
 
 void initMem(void)
 {
-    putStr("[10] init memory\n");
+    printk("[10] init memory\n");
     int count = *((uint32*)ARDS_ENTRY_COUNT_PADDR);
     struct ARDS ards[count];
     uint32 maxIndex = 0;
@@ -492,7 +492,7 @@ void initMem(void)
        uint2HexStr(ll, ards[index].lengthLow, 8);
        memset(msgBuff, '\0', 128);
        format(msgBuff, "     BASE = 0x%s%s, LENGHT = 0x%s%s, TYPE = %d\n", bh, bl, lh, ll, ards[index].type);
-       putStr(msgBuff);
+       printk(msgBuff);
        length = (((uint64)ards[index].lengthHigh) << 32) + (uint64)ards[index].lengthLow;
        if(length > maxLength){
            maxLength = length;

@@ -1,10 +1,11 @@
 #include "stdio.h"
-#include "print.h"
+#include "printk.h"
 #include "../include/stdint.h"
 #include "debug.h"
 #include "string.h"
 #include "interrupt.h"
 #include "syscall.h"
+
 /* 整型转换成字符（Integer to ASCII）
  *
  */
@@ -38,10 +39,15 @@ uint32 vsprintf(char* str, const char* format, va_list ap)
             indexChar = *(++indexPtr);
             continue;
         }
+        // 获取字符格式化数据
         indexChar = *(++indexPtr);
-        
         switch (indexChar)
         {
+        case 'b':
+            argInt = va_arg(ap, int);
+            itoa(argInt, &bufPtr, 2);
+            indexChar = *(++indexPtr);
+            break;
         case 'd':
             argInt = va_arg(ap, int);
             if(argInt < 0){

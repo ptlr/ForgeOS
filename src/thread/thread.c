@@ -125,7 +125,7 @@ void schedule(){
     switch2(current, next);
 }
 void initThreadEnv(void){
-    putStr("[10] init thread env\n");
+    printk("[10] init thread env\n");
     listInit(&readyThreadList);
     listInit(&allThreadList);
     lockInit(&pidLock, "PidLock");

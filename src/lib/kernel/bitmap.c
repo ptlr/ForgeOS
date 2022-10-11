@@ -1,6 +1,6 @@
 #include "bitmap.h"
 #include "string.h"
-#include "print.h"
+#include "printk.h"
 #include "debug.h"
 #include "stdio.h"
 #include "console.h"
