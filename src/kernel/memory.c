@@ -450,11 +450,11 @@ static void initMemPool(uint32 maxMemSize)
     userPool.bitmap.length = userFreePages / 8;
     userPool.bitmap.bits = (void*)USER_PMEM_BITMAP_VADDR;
     memset(msgBuff, '\0', 128);
-    format(msgBuff, "     kernel pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",(uint32)kernelPool.phyaddrStart, (uint32)kernelPool.bitmap.bits);
+    strformat(msgBuff, "     kernel pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",(uint32)kernelPool.phyaddrStart, (uint32)kernelPool.bitmap.bits);
     // 输出简单的信息
     printk(msgBuff);
     memset(msgBuff, '\0', 128);
-    format(msgBuff, "     user   pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",userPool.phyaddrStart, userPool.bitmap.bits);
+    strformat(msgBuff, "     user   pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",userPool.phyaddrStart, userPool.bitmap.bits);
     printk(msgBuff);
     // 初始化bitmap
     initBitmap(&kernelPool.bitmap);    
@@ -491,7 +491,7 @@ void initMem(void)
        uint2HexStr(lh, ards[index].lengthHigh, 8);
        uint2HexStr(ll, ards[index].lengthLow, 8);
        memset(msgBuff, '\0', 128);
-       format(msgBuff, "     BASE = 0x%s%s, LENGHT = 0x%s%s, TYPE = %d\n", bh, bl, lh, ll, ards[index].type);
+       strformat(msgBuff, "     BASE = 0x%s%s, LENGHT = 0x%s%s, TYPE = %d\n", bh, bl, lh, ll, ards[index].type);
        printk(msgBuff);
        length = (((uint64)ards[index].lengthHigh) << 32) + (uint64)ards[index].lengthLow;
        if(length > maxLength){

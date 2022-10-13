@@ -4,6 +4,7 @@
 #include "interrupt.h"
 #include "stdarg.h"
 #include "stdio.h"
+#include "format.h"
 
 // 控制台锁
 static struct Lock consoleLock;
@@ -33,11 +34,11 @@ void consoleNum(uint32 num, int base){
     putNum(num, base);
     consoleRelease();
 }
-void consolePrintf(const char* format, ...){
+void consolePrintf(const char* fmt, ...){
     va_list args;
-    va_start(args, format);
+    va_start(args, fmt);
     char buffer[1024] = {0};
-    vsprintf(buffer, format, args);
+    format(buffer, fmt, args);
     va_end(args);
     consoleAcquire();
     printk(buffer);

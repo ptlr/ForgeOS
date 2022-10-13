@@ -49,7 +49,8 @@ DIR_SCRIPTS = ./scripts
 OBJ_NAMES = kernel.o printk.a.o interrupt.a.o printk.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
 		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o keyboard.c.o \
-		ioqueue.c.o tss.c.o process.c.o syscall.c.o syscall-init.c.o
+		ioqueue.c.o tss.c.o process.c.o syscall.c.o syscall-init.c.o number.c.o \
+		format.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -98,6 +99,12 @@ $(DIR_BUILD)init.c.o:$(DIR_KERNEL)/init.c $(DIR_INC)/* $(DIR_KERNEL)/init.h
 $(DIR_BUILD)timer.c.o:$(DIR_KERNEL)/timer.c $(DIR_INC)/*
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 $(DIR_BUILD)debug.c.o : $(DIR_KERNEL)/debug.c $(DIR_INC)/*
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译number库
+$(DIR_BUILD)number.c.o:$(DIR_PUBLIC_LIB)/number.c $(DIR_INC)/*
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# format库
+$(DIR_BUILD)format.c.o:$(DIR_PUBLIC_LIB)/format.c $(DIR_INC)/*
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译string库
 $(DIR_BUILD)string.c.o:$(DIR_PUBLIC_LIB)/string.c $(DIR_INC)/*

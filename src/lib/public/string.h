@@ -25,7 +25,9 @@ char* strcpy(char* dst_, const char* src_);
 /* 功能： 将src_拼接到dst_后, 返回拼接后的地址
  */
 char* strcat(char* dst_, const char* src_);
-
+/* 功能：位字符串添加重复的字符
+ */
+char* strrepeatapp(char* str, const char ch, int32 repeat);
 /* 功能： 返回字符串的长度
  */
 uint32 strlen(const char* str);
@@ -52,5 +54,5 @@ uint32 strchrs(const char* str, const uint8 ch);
  * 格式化字符串
  * 
  */
-void format(char* buffer, const char* format, ...);
+void strformat(char* buffer, const char* format, ...);
 #endif

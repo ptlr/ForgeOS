@@ -7,6 +7,7 @@
 #include "constant.h"
 #include "stdarg.h"
 #include "stdio.h"
+#include "format.h"
 
 uint8 displayColor = COLOR_FG_GREEN | COLOR_FG_BLUE;
 uint16 getCursor(void){
@@ -35,6 +36,7 @@ uint8 setColor(uint8 color)
 void putChar(uint8 asciiCh){
     cPutChar(displayColor, asciiCh);
 }
+// ToDo: 有缺陷，不能处理负数
 void putNum(uint32 num, uint32 base){
     char buffer[32];
     uint32 result = num;
@@ -91,7 +93,7 @@ void printk(const char* str){
 
 void printkf(const char* fmt, ...){
     va_list args;
-    va_start(args, format);
+    va_start(args, fmt);
     char buffer[1024] = {0};
     format(buffer, fmt, args);
     va_end(args);

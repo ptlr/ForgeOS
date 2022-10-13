@@ -108,7 +108,7 @@ void processExecute(void* fileName, char* name){
     listAppend(&readyThreadList, &thread->generalTag);
     ASSERT(!listFind(&allThreadList,&thread->allListTag))
     listAppend(&allThreadList, &thread->allListTag);
-    format(buff, "RTL: num = 0x%x, pid = 0x%x\n",listLen(&allThreadList), (uint32)thread->pid);
+    strformat(buff, "RTL: num = 0x%x, pid = 0x%x\n",listLen(&allThreadList), (uint32)thread->pid);
     //consolePrint(buff);
     setIntrStatus(oldStatus);
     //logWarning("PE END\n");

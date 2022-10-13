@@ -41,7 +41,7 @@ void kThreadA(void* arg){
     void* vaddr1 = sys_malloc(256);
     void* vaddr2 = sys_malloc(255);
     void* vaddr3 = sys_malloc(254);
-    format(buffer, "KTA VADDR: 0x%x,0x%x,0x%x\n", (uint32)vaddr1, (uint32)vaddr2, (uint32)vaddr3);
+    strformat(buffer, "KTA VADDR: 0x%08x,0x%08x,0x%08x\n", (uint32)vaddr1, (uint32)vaddr2, (uint32)vaddr3);
     consolePrint(buffer);
     int cpu_delay = 10000;
     while (cpu_delay-- > 0);
@@ -56,7 +56,7 @@ void kThreadB(void* arg){
     void* vaddr1 = sys_malloc(256);
     void* vaddr2 = sys_malloc(255);
     void* vaddr3 = sys_malloc(254);
-    format(buffer, "KTB VADDR: 0x%x,0x%x,0x%x\n", (uint32)vaddr1, (uint32)vaddr2, (uint32)vaddr3);
+    strformat(buffer, "KTA VADDR: 0x%08x,0x%08x,0x%08x\n", (uint32)vaddr1, (uint32)vaddr2, (uint32)vaddr3);
     consolePrint(buffer);
     int cpu_delay = 10000;
     while (cpu_delay-- > 0);
@@ -69,7 +69,7 @@ void uProcA(void){
     void* vaddr1 = malloc(256);
     void* vaddr2 = malloc(255);
     void* vaddr3 = malloc(254);
-    printf("UPA VADDR: 0x%x,0x%x,0x%x\n", (uint32)vaddr1, (uint32)vaddr2, (uint32)vaddr3);
+    printf("UPA VADDR: 0x%08x,0x%08x,0x%08x\n", (uint32)vaddr1, (uint32)vaddr2, (uint32)vaddr3);
     int cpu_delay = 10000;
     while (cpu_delay-- > 0);
     free(vaddr1);
@@ -81,7 +81,7 @@ void uProcB(void){
     void* vaddr1 = malloc(256);
     void* vaddr2 = malloc(255);
     void* vaddr3 = malloc(254);
-    printf("UPB VADDR: 0x%x,0x%x,0x%x\n", (uint32)vaddr1, (uint32)vaddr2, (uint32)vaddr3);
+    printf("UPB VADDR: 0x%08x,0x%08x,0x%08x\n", (uint32)vaddr1, (uint32)vaddr2, (uint32)vaddr3);
     int cpu_delay = 10000;
     while (cpu_delay-- > 0);
     free(vaddr1);

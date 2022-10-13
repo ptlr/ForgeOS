@@ -5,6 +5,7 @@
 #include "stdio.h"
 #include "stdarg.h"
 #include "console.h"
+#include "format.h"
 //内存相关
 
 /* 功能：将从dst_开始size个字节设置为value
@@ -77,7 +78,20 @@ char* strcat(char* dst_, const char* src_)
     while((*str++ = *src_++));
     return dst_;
 }
-
+/* 功能：为字符串添加重复的字符
+ */
+char* strrepeatapp(char* str, const char ch, int32 repeat){
+    char* mstr = str;
+    while(*mstr){
+        mstr++;
+    };
+    while(repeat-- > 0){
+        *mstr = ch;
+        mstr++;
+    }
+    *mstr = '\0';
+    return str;
+}
 /* 功能： 返回字符串的长度
  */
 uint32 strlen(const char* str)
@@ -154,14 +168,9 @@ uint32 strchrs(const char* str, const uint8 ch)
     }
     return chCnt;
 }
-void format(char* buffer, const char* format, ...){
+void strformat(char* str, const char* fmt, ...){
     va_list args;
-    /**
-     * 根据调用约定，从右往左压入参数。
-     * format的地址+4等于可变参数的第一个参数。
-     * va_start把args地址指向format,va_args把ap+4后返回
-     */
-    va_start(args, format);
-    vsprintf(buffer, format, args);
+    va_start(args, fmt);
+    format(str,fmt, args);
     va_end(args);
 }
