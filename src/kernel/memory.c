@@ -450,11 +450,11 @@ static void initMemPool(uint32 maxMemSize)
     userPool.bitmap.length = userFreePages / 8;
     userPool.bitmap.bits = (void*)USER_PMEM_BITMAP_VADDR;
     memset(msgBuff, '\0', 128);
-    strformat(msgBuff, "     kernel pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",(uint32)kernelPool.phyaddrStart, (uint32)kernelPool.bitmap.bits);
+    strformat(msgBuff, "     kernel pool: PADDR_START = 0x%08x, BITMAP_VADDR = 0x%08x\n",(uint32)kernelPool.phyaddrStart, (uint32)kernelPool.bitmap.bits);
     // 输出简单的信息
     printk(msgBuff);
     memset(msgBuff, '\0', 128);
-    strformat(msgBuff, "     user   pool: PADDR_START = 0x%x, BITMAP_VADDR = 0x%x\n",userPool.phyaddrStart, userPool.bitmap.bits);
+    strformat(msgBuff, "     user   pool: PADDR_START = 0x%08x, BITMAP_VADDR = 0x%08x\n",userPool.phyaddrStart, userPool.bitmap.bits);
     printk(msgBuff);
     // 初始化bitmap
     initBitmap(&kernelPool.bitmap);    
@@ -470,9 +470,9 @@ static void initMemPool(uint32 maxMemSize)
     lockInit(&userPool.lock, "UserMemLock");
 }
 
-void initMem(void)
+void initMem(int step)
 {
-    printk("[10] init memory\n");
+    printkf("[%02d] init memory\n", step);
     int count = *((uint32*)ARDS_ENTRY_COUNT_PADDR);
     struct ARDS ards[count];
     uint32 maxIndex = 0;

@@ -93,7 +93,7 @@ struct TaskStruct{
  */
 extern struct ListElem* generalTag;
 // 用于初始化线程环境
-void initThreadEnv(void);
+void initThreadEnv(int step);
 // 导入外部函数
 extern void switch2(struct TaskStruct* currentThread, struct TaskStruct* nextThread);
 //获取当前线程的PCB

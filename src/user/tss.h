@@ -34,5 +34,5 @@ struct TSS{
 /* 更新tss中ESP0字段的值为pthread的0级栈 */
 void updateTssEsp0(struct TaskStruct* pthread);
 /* 初始化TSS */
-void initTss();
+void initTss(int step);
 #endif

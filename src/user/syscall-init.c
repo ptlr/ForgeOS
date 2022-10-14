@@ -13,8 +13,8 @@ uint32 sys_getpid(void){
     return runningThread()->pid;
 }
 /*初始化系统调用*/
-void syscallInit(void){
-    printk("[14] init system call\n");
+void syscallInit(int step){
+    printkf("[%02d] init system call\n", step);
     syscallTable[SYS_GETPID] = sys_getpid;
     syscallTable[SYS_WRITE]  = sys_write;
     syscallTable[SYS_MALLOC] = sys_malloc;

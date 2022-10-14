@@ -92,9 +92,9 @@ static void initException(void){
     intrNames[18] = "#MC Machine-Check Exception";
     intrNames[19] = "#XF SIMD Floating-Point Exception";
 }
-static void initPic(void)
+static void initPic(int step)
 {
-    printk("[08] init PIC\n");
+    printkf("[%02d] init PIC\n", step);
     // 初始化主片
     outb(PIC_M_CTRL, 0x11); // ICW1：边缘触发，级联8259，需要ICW4
     outb(PIC_M_DATA, 0x20); // ICW2: 起始中断号为0x20，即IR0~IR7为中断0x20~0x27
@@ -115,12 +115,12 @@ static void initPic(void)
     outb(PIC_M_DATA, 0xFC); // 开启时钟中断和键盘中断
     outb(PIC_S_DATA, 0xFF); // 从片OCW1：屏蔽所有中断
 }
-void initIdt()
+void initIdt(int step)
 {
-    printk("[07] init IDT\n");
+    printkf("[%02d] init IDT\n", step);
     initIdtDesc();
     initException();
-    initPic();
+    initPic(step + 1);
     //while (1);
     //printf("    *IDT VADDR: %x\n",(uint32)&IDT);
     //uint64 preAddr = ;

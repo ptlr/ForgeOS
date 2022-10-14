@@ -32,5 +32,5 @@
 #define CAPS_LOCK_MAKE  0x3a
 // 导出键盘缓冲区
 extern struct ioqueue KBD_BUFFER;
-void initKeyboard();
+void initKeyboard(int step);
 #endif

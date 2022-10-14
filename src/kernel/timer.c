@@ -30,9 +30,9 @@ static void setFrequency(uint8 counterPort, uint8 counterNo, uint8 rwl, uint8 mo
     outb(counterPort, (uint8)countValue >> 8);
 }
 
-void initTimer()
+void initTimer(int step)
 {
-    printk("[09] init timer\n");
+    printkf("[%02d] init timer\n", step);
     uint16 countVal = FREQUENCY_MAX / FREQUENCY_24Hz;
     setFrequency(PORT_COUNTER0, SC_COUNTER0, RWL_LOW_HIGH, COUNTOR_MODE2, countVal);
     // 注册时钟中断处理函数

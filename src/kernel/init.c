@@ -6,15 +6,21 @@
 #include "keyboard.h"
 #include "tss.h"
 #include "syscall-init.h"
+static int step = 6;
+static int currentStep(){
+    step += 1;
+    return step - 1;
+}
 void init(void)
 {
-    printk("[06] start init\n");
-    initIdt(); // IDT需要最先初始化
-    initTimer();
-    initMem();
-    initThreadEnv();
-    consoleInit();
-    initKeyboard();
-    initTss();
-    syscallInit();
+    printkf("[%02d] start init\n", currentStep());
+    initIdt(currentStep()); // IDT需要最先初始化
+    currentStep();
+    initTimer(currentStep());
+    initMem(currentStep());
+    initThreadEnv(currentStep());
+    consoleInit(currentStep());
+    initKeyboard(currentStep());
+    initTss(currentStep());
+    syscallInit(currentStep());
 }

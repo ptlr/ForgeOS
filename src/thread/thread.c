@@ -124,8 +124,8 @@ void schedule(){
     activateProcess(next);
     switch2(current, next);
 }
-void initThreadEnv(void){
-    printk("[10] init thread env\n");
+void initThreadEnv(int step){
+    printkf("[%02d] init thread env\n", step);
     listInit(&readyThreadList);
     listInit(&allThreadList);
     lockInit(&pidLock, "PidLock");
