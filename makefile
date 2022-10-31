@@ -50,7 +50,7 @@ OBJ_NAMES = kernel.o printk.a.o interrupt.a.o printk.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
 		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o keyboard.c.o \
 		ioqueue.c.o tss.c.o process.c.o syscall.c.o syscall-init.c.o number.c.o \
-		format.c.o
+		format.c.o ide.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -128,6 +128,9 @@ $(DIR_BUILD)sync.c.o:$(DIR_THREAD)/sync.c $(DIR_THREAD)/sync.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译console
 $(DIR_BUILD)console.c.o:$(DIR_DEVICE)/console.c $(DIR_DEVICE)/console.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译ide
+$(DIR_BUILD)ide.c.o: $(DIR_DEVICE)/ide.c $(DIR_DEVICE)/ide.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译keybord
 $(DIR_BUILD)keyboard.c.o:$(DIR_DEVICE)/keyboard.c $(DIR_DEVICE)/keyboard.h

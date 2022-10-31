@@ -10,8 +10,8 @@
 static struct Lock consoleLock;
 
 /*初始化终端*/
-void consoleInit(int step){
-    printkf("[%02d] init console\n", step);
+void consoleInit(int (* step)(void)){
+    printkf("[%02d] init console\n", step());
     lockInit(&consoleLock, "ConsoleLock");
 }
 /*获取终端*/

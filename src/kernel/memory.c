@@ -470,9 +470,9 @@ static void initMemPool(uint32 maxMemSize)
     lockInit(&userPool.lock, "UserMemLock");
 }
 
-void initMem(int step)
+void initMem(int (* step)(void))
 {
-    printkf("[%02d] init memory\n", step);
+    printkf("[%02d] init memory\n", step());
     int count = *((uint32*)ARDS_ENTRY_COUNT_PADDR);
     struct ARDS ards[count];
     uint32 maxIndex = 0;

@@ -179,8 +179,8 @@ static void intrKeyboardHandler(){
     }
     return;
 }
-void initKeyboard(int step){
-    printkf("[%02d] init keyboard\n", step);
+void initKeyboard(int (* step)(void)){
+    printkf("[%02d] init keyboard\n", step());
     initIoqueue(&KBD_BUFFER);
     registerHandler(INTR_0x21_KEYBOARD, intrKeyboardHandler);
 }

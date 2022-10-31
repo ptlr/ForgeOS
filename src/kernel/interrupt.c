@@ -26,6 +26,7 @@ static void generalIntrHandler(uint8 intrVecNum)
     }
     if(intrVecNum == 0x27 || intrVecNum == 0x2F)
     {
+        printk("HERE\n");
         return;
     }
     setColor(COLOR_BG_DARK | COLOR_FG_RED);
@@ -92,9 +93,9 @@ static void initException(void){
     intrNames[18] = "#MC Machine-Check Exception";
     intrNames[19] = "#XF SIMD Floating-Point Exception";
 }
-static void initPic(int step)
+static void initPic(int (* step)(void))
 {
-    printkf("[%02d] init PIC\n", step);
+    printkf("[%02d] init PIC\n", step());
     // 初始化主片
     outb(PIC_M_CTRL, 0x11); // ICW1：边缘触发，级联8259，需要ICW4
     outb(PIC_M_DATA, 0x20); // ICW2: 起始中断号为0x20，即IR0~IR7为中断0x20~0x27
@@ -112,15 +113,15 @@ static void initPic(int step)
     // 测试键盘，关闭其他中断
     //outb(PIC_M_DATA, 0xFE); // 主片OCW1: 开启IR0(时钟中断)
     //outb(PIC_M_DATA, 0xFD); // 只开启键盘中断
-    outb(PIC_M_DATA, 0xFC); // 开启时钟中断和键盘中断
-    outb(PIC_S_DATA, 0xFF); // 从片OCW1：屏蔽所有中断
+    outb(PIC_M_DATA, 0xF8); // 开启时钟中断、键盘中断、IRQ2中断
+    outb(PIC_S_DATA, 0xBF); // 从片: 打开从片上的IRQ14, 此引脚接收硬盘控制器的中断。
 }
-void initIdt(int step)
+void initIdt(int (* step)(void))
 {
-    printkf("[%02d] init IDT\n", step);
+    printkf("[%02d] init IDT\n", step());
     initIdtDesc();
     initException();
-    initPic(step + 1);
+    initPic(step);
     //while (1);
     //printf("    *IDT VADDR: %x\n",(uint32)&IDT);
     //uint64 preAddr = ;

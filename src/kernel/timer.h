@@ -28,5 +28,9 @@
 
 #define BCD_FALSE            0
 #define BCD_TRUE            1
-void initTimer(int step);
+
+#include "stdint.h"
+
+void initTimer(int (* step)(void));
+void msSleep(uint32 msecs);
 #endif

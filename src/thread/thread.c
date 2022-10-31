@@ -17,6 +17,15 @@ struct List readyThreadList;
 struct List allThreadList;
 // 定义
 struct ListElem* generalTag;
+// 系统空闲时运行的线程
+struct TaskStruct* idleThread;
+static void IDLE(void* arg){
+    while(1){
+        threadBlock(TASK_BLOCKED);
+        // 执行hlt时必须开中断。
+        asm volatile("sti; hlt" : : : "memory");
+    }
+}
 /*由kernelThread去执行function(funcArg)*/
 static void kernelThread(thread_func* func, void* funcArg){
     // 执行前开中断，避免其他线程无法被调度
@@ -104,6 +113,15 @@ struct TaskStruct* runningThread(void){
     // esp的整数部分即PCB的起始地址
     return (struct TaskStruct*)(esp & 0xFFFFF000);
 }
+// 主动让出CPU让其他线程运行
+void threadYeild(void){
+    struct TaskStruct* currentThread = runningThread();
+    enum IntrStatus oldStatus = intrDisable();
+    listAppend(&readyThreadList, &currentThread->generalTag);
+    currentThread->status = TASK_READY;
+    schedule();
+    setIntrStatus(oldStatus);
+}
 void schedule(){
     ASSERT(getIntrStatus() == INTR_OFF);
     struct TaskStruct* current = runningThread();
@@ -113,8 +131,11 @@ void schedule(){
         current->ticks = current->priority;
         current->status = TASK_READY;
     }else{
-        //while(1);
         /* 如果此线程需要某件事发生后才继续运行，不需要加入到就绪队列 */
+    }
+    // 检查就绪队列里是否有线程，没有则运行IDEL线程
+    if(listIsEmpty(&readyThreadList)){
+        threadUnblock(idleThread);
     }
     // 调度其他任务， ready队列不应该为空
     ASSERT(!listIsEmpty(&readyThreadList));
@@ -124,12 +145,13 @@ void schedule(){
     activateProcess(next);
     switch2(current, next);
 }
-void initThreadEnv(int step){
-    printkf("[%02d] init thread env\n", step);
+void initThreadEnv(int (* step)(void)){
+    printkf("[%02d] init thread env\n", step());
     listInit(&readyThreadList);
     listInit(&allThreadList);
     lockInit(&pidLock, "PidLock");
     implementMainThread();
+    idleThread = startThread("IDLE", 10, IDLE, NULL);
 }
 
 /* 当前线程将阻塞自己，并将状态设置为status */

@@ -93,7 +93,7 @@ struct TaskStruct{
  */
 extern struct ListElem* generalTag;
 // 用于初始化线程环境
-void initThreadEnv(int step);
+void initThreadEnv(int (* step)(void));
 // 导入外部函数
 extern void switch2(struct TaskStruct* currentThread, struct TaskStruct* nextThread);
 //获取当前线程的PCB
@@ -107,4 +107,6 @@ void schedule(void);
 void threadBlock(enum TaskStatus status);
 /* 将线程解除阻塞，并将状态设置为status */
 void threadUnblock(struct TaskStruct* thread);
+// 主动让出CPU让其他线程运行
+void threadYeild(void);
 #endif

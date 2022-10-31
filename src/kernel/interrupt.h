@@ -24,7 +24,7 @@ struct GateDesc
    uint8 attribute;
    uint16 funcOffsetHighWord; 
 };
-void initIdt(int step);
+void initIdt(int (* step)(void));
 
 // 中断相关
 

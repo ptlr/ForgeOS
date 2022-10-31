@@ -26,13 +26,13 @@ void uProcA(void);
 void uProcB(void);
 void kernelMain(void)
 {
-    printkf("%s\n\n\n\n", MSG_KERNEL);
+    printkf("\n\n\n\n%s", MSG_KERNEL);
     init();
     intrEnable();
-    processExecute(uProcA, "UPA");
+    /*processExecute(uProcA, "UPA");
     processExecute(uProcB, "UPB");
     startThread("KTA", 31, kThreadA, "KTA");
-    startThread("KTB", 31, kThreadB, "KTB");
+    startThread("KTB", 31, kThreadB, "KTB");*/
     while(1);
 }
 void kThreadA(void* arg){

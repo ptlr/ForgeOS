@@ -22,8 +22,8 @@ static struct GdtDesc makeGdtDesc(uint32* descAddr, uint32 limit, uint8 attrLow,
     return desc;
 }
 /* 初始化TSS */
-void initTss(int step){
-    printkf("[%02d] init TSS\n", step);
+void initTss(int (* step)(void)){
+    printkf("[%02d] init TSS\n", step());
     uint32 tssSize = sizeof(tss);
     // 清空TSS
     memset(&tss, 0, tssSize);
