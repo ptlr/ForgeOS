@@ -90,6 +90,10 @@ uint32 format(char* str, const char* fmt, va_list ap){
             break;
         case 'd':
             argInt = va_arg(ap, int);
+            if(argInt < 0){
+                argInt = 0 -argInt;
+                *bufPtr++ = '-';
+            }
             memset(numBuff, '\0', 256);
             strBuff = numBuff;
             itoa(argInt, &strBuff, 10);
