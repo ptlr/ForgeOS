@@ -55,7 +55,7 @@ void activateProcess(struct TaskStruct* pThread){
     }
 }
 /* 创建用户页目录表
- * 成功则返回页目录的虚拟地址，否则返回负一
+ * 成功则返回页目录的虚拟地址，否则返回NULL
  */
 uint32* createUserPageDir(void){
     // 用户进程的页表不能让用户访问，从内核中申请内存

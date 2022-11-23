@@ -478,12 +478,12 @@ static void initMemPool(uint32 maxMemSize)
 void* forkMapVaddr(enum PoolFlag pf, uint32 vaddr){
     struct Pool* memPool = pf & PF_KERNEL ? &kernelPool : &userPool;
     lockAcquire(&memPool->lock);
-    void* pagePaddr = palloc(&memPool);
+    void* pagePaddr = palloc(memPool);
     if(pagePaddr == NULL){
         lockRelease(&memPool->lock);
         return NULL;
     }
-    addPageTable(vaddr, pagePaddr);
+    addPageTable((void*)vaddr, pagePaddr);
     lockRelease(&memPool->lock);
     return (void*)vaddr;
 }

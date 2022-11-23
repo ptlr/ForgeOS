@@ -18,6 +18,17 @@
 #include "fs.h"
 #include "file.h"
 extern void kernelMain(void);
+extern void init(void);
+// init进程
+void init(void){
+    uint32 retPid = fork();
+    if(retPid){
+        printf("Father thread, pid is %d, child pid %d\n", getpid(), retPid);
+    }else{
+        printf("Child thread, pid is %d, ret pid %d\n", getpid(), retPid);
+    }
+    while (1);
+}
 char* MSG_KERNEL = "[05] kernel start\n";
 char* firstFile = "/first";
 char* subDir = "/dir1";
@@ -33,7 +44,7 @@ void uProcB(void);
 void kernelMain(void)
 {
     printkf("\n\n\n\n%s", MSG_KERNEL);
-    init();
+    initKernel();
     intrEnable();
     /*processExecute(uProcA, "UPA");
     processExecute(uProcB, "UPB");
@@ -45,7 +56,7 @@ void kernelMain(void)
     //opendir();
     //rmdirTest();
     //cwdTest();
-    fileInfoTest();
+    //fileInfoTest();
     while(1);
 }
 // 文件信息测试
@@ -97,7 +108,7 @@ void opendir(void){
         printf("'%s' open done!\ncontent:\n", dir1);
         char* type = NULL;
         struct DirEntry* dirEntryPtr = NULL;
-        while (dirEntryPtr = sysReadDirEntry(parentDir))
+        while ((dirEntryPtr = sysReadDirEntry(parentDir)))
         {
             if(dirEntryPtr->fileType == FT_FILE){
                 type = "FILE";
@@ -122,7 +133,7 @@ void rmdirTest(void){
     struct Dir* dirPtr = sysOpendir(subDir);
     char* type = NULL;
     struct DirEntry* dirEntry = NULL;
-    while(dirEntry = sysReadDirEntry(dirPtr)){
+    while((dirEntry = sysReadDirEntry(dirPtr))){
         if(dirEntry->fileType == FT_FILE){
             type = "FILE";
         }else{

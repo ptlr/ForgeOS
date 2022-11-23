@@ -24,7 +24,7 @@ void putChar(uint8 asciiCh);
 void putNum(uint32 num, uint32 base);
 void uint2HexStr(char* buff, uint32 num, uint32 width);
 // 清屏
-void clsScreen();
+void clsScreen(void);
 //prink留在之后待用
 void printk(const char* str);
 void printkf(const char* fmt, ...);

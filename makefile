@@ -54,7 +54,7 @@ OBJ_NAMES = kernel.o printk.a.o interrupt.a.o printk.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
 		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o keyboard.c.o \
 		ioqueue.c.o tss.c.o process.c.o syscall.c.o syscall-init.c.o number.c.o \
-		format.c.o ide.c.o fs.c.o inode.c.o file.c.o dir.c.o block.c.o
+		format.c.o ide.c.o fs.c.o inode.c.o file.c.o dir.c.o block.c.o fork.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -164,6 +164,9 @@ $(DIR_BUILD)tss.c.o: $(DIR_USER)/tss.c $(DIR_USER)/tss.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 用户进程
 $(DIR_BUILD)process.c.o: $(DIR_USER)/process.c $(DIR_USER)/process.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# fork
+$(DIR_BUILD)fork.c.o : $(DIR_USER)/fork.c $(DIR_USER)/fork.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # syscall
 $(DIR_BUILD)syscall.c.o : $(DIR_USER_LIB)/syscall.c $(DIR_USER_LIB)/syscall.h

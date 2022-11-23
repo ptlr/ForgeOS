@@ -107,7 +107,6 @@ void createDirEntry(char* fileName, uint32 inodeNum, uint8 fileType, struct DirE
 bool syncDirEntry(struct Dir* parentDir, struct DirEntry* dirEntry, void* ioBuffer){
     struct BlockInfo blockInfo = {-1, 0};
     struct Inode* pInode = parentDir->inode;
-    uint32 dirDataSize = pInode->dataSize;
     uint32 dirEntrySize = currentPart->superBlock->dirEntrySize;
     uint32 dirEntryCntPerSec = SECTOR_SIZE / dirEntrySize;
     int32 blockLBA = -1;

@@ -14,7 +14,7 @@ static int currentStep(void){
     step += 1;
     return step - 1;
 }
-void init(void)
+void initKernel(void)
 {
     printkf("[%02d] start init\n", currentStep());
     initIdt(currentStep); // IDT需要最先初始化

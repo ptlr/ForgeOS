@@ -62,3 +62,7 @@ void* malloc(uint32 size){
 void free(void* ptr){
     _syscall1(SYS_FREE, ptr);
 }
+// 创建子进程
+int16 fork(void){
+    return _syscall0(SYS_FORK);
+}

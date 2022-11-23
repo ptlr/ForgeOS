@@ -8,7 +8,7 @@
 #include "debug.h"
 #include "process.h"
 #include "console.h"
-
+extern void init(void);
 // 主线程
 struct TaskStruct* kernelMainThread;
 // 就绪队列
@@ -162,8 +162,11 @@ void initThreadEnv(int (* step)(void)){
     listInit(&readyThreadList);
     listInit(&allThreadList);
     lockInit(&pidLock, "PidLock");
+    // 创建第一个用户进程:init
+    processExecute(init, "init");
+    // 完善内核线程
     implementMainThread();
-    //while(1);
+    // 启动idle线程
     idleThread = startThread("IDLE", 10, IDLE, NULL);
 }
 
@@ -193,4 +196,8 @@ void threadUnblock(struct TaskStruct* thread){
     }else{
     }
     setIntrStatus(oldStatus);
+}
+// forkPid
+int16 forkPid(void){
+    return allocatePid();
 }

@@ -5,6 +5,7 @@
 #include "thread.h"
 #include "console.h"
 #include "fs.h"
+#include "fork.h"
 
 #define SYSCALL_COUNT  32
 typedef void* syscall;
@@ -20,10 +21,5 @@ void syscallInit(int (* step)(void)){
     syscallTable[SYS_WRITE]  = sysWrite;
     syscallTable[SYS_MALLOC] = sys_malloc;
     syscallTable[SYS_FREE] = sys_free;
+    syscallTable[SYS_FORK] = sysFork;
 }
-/*
-uint32 sys_write(char* str){
-    consolePrint(str); 
-    return strlen(str);
-}
-*/

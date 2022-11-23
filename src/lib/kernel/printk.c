@@ -83,7 +83,7 @@ void uint2HexStr(char* buff, uint32 num, uint32 width)
     }
 }
 // 清屏
-void clsScreen(){
+void clsScreen(void){
     
 }
 void printk(const char* str){

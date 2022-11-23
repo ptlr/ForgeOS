@@ -8,6 +8,7 @@
 #include "interrupt.h"
 #include "file.h"
 // 根据blockIndex分析，该块类型（直接块，间接块）
+/*
 static enum BlockType analyseBlockType(int blockIndex){
     if(blockIndex < 12){
         return L0_BLOCK;
@@ -18,7 +19,7 @@ static enum BlockType analyseBlockType(int blockIndex){
     }else{
         return L3_BLOCK;
     }
-}
+}*/
 // 根据inode号获取inode位置信息
 static void inodeLocate(struct Partition* part, uint32 inodeNum, struct InodePosition* inodePos){
     /* inodeTable在硬盘山是连续的*/

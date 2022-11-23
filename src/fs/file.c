@@ -304,8 +304,6 @@ int32 fileRead(struct File* file, void* buffer, uint32 count){
     }
     inodeReadL1BlocksLBA(currentPart, file->fdInode, allBlocks + 12);
     // 3、读取文件
-    uint32 readStartIndex = file->fdPos / BLOCK_SIZE;
-    uint32 readEndIndex = (file->fdPos + size) / BLOCK_SIZE;
     //uint32 readBlockCnt = readEndIndex - readStartIndex;
     uint32 chunkSize = 0;
     uint32 secOffsetCnt = 0;

@@ -91,6 +91,8 @@ struct TaskStruct{
     int32 fdTable[PROC_MAX_OPEN_FILE_NUM];
     // 以根目录作为默认目录
     uint32 cwdInodeNum;
+    // 父进程的pid
+    int16 ppid;
     // 魔术，用于检测栈边界是否溢出
     uint32 stackMagic;
 };
@@ -115,4 +117,6 @@ void threadBlock(enum TaskStatus status);
 void threadUnblock(struct TaskStruct* thread);
 // 主动让出CPU让其他线程运行
 void threadYeild(void);
+// forkPid
+int16 forkPid(void);
 #endif
