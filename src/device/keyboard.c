@@ -146,6 +146,10 @@ static void intrKeyboardHandler(void){
             char currentChar = KEY_MAP[index][shift];
             // 如果字符可见，输出
             if(currentChar){
+                // 在此处添加快捷键处理
+                if((ctrlDownLast && currentChar == 'l') || (ctrlDownLast && currentChar == 'u')){
+                    currentChar -= 'a';
+                }
                 if(!ioqIsFull(&KBD_BUFFER)){
                     //putChar(currentChar);
                     ioqPutChar(&KBD_BUFFER, currentChar);
@@ -168,9 +172,6 @@ static void intrKeyboardHandler(void){
                 break;
             case CAPS_LOCK_MAKE:
             CAPS_LOCK_STATUS = !CAPS_LOCK_STATUS;
-                break;
-            default:
-                logWarning("UnSupport CTRL key\n");
                 break;
             }
         }
