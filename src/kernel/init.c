@@ -7,8 +7,10 @@
 #include "tss.h"
 #include "syscall-init.h"
 #include "ide.h"
+#include "fs.h"
+
 static int step = 6;
-static int currentStep(){
+static int currentStep(void){
     step += 1;
     return step - 1;
 }
@@ -24,4 +26,5 @@ void init(void)
     initTss(currentStep);
     syscallInit(currentStep);
     initIDE(currentStep);
+    initFileSystem(currentStep);
 }

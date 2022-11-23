@@ -22,7 +22,7 @@ void memset(void* dst_, uint8 value, uint32 size)
 }
 /* 功能： 将src_开始的size个字节复制到dst_
  */
-void memcpy(void* dst_, void* src_, uint32 size)
+void memcpy(void* dst_, const void* src_, uint32 size)
 {
     ASSERT(dst_!= NULL && src_ != NULL);
     uint8* dst = (uint8*)dst_;

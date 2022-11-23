@@ -26,7 +26,7 @@ static void generalIntrHandler(uint8 intrVecNum)
     }
     if(intrVecNum == 0x27 || intrVecNum == 0x2F)
     {
-        printk("HERE\n");
+        //printk("HERE\n");
         return;
     }
     setColor(COLOR_BG_DARK | COLOR_FG_RED);

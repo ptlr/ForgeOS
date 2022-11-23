@@ -1,15 +1,17 @@
 CC=gcc
 # C flags
-CFLAGS	 = -g -c -m32
+CFLAGS	 = -c -m32
 CFLAGS	+= -nostdlib
 CFLAGS	+= -fno-builtin
 CFLAGS	+= -fno-stack-protector
 CFLAGS	+= -Wall
+#CFLAGS  += -no-pie
+#CFLAGS  += -fno-pic
 # 去掉函数前面的下划线
 #CFLAGS  += -fleading-underscore --no-leading-underscore
 #CFLAGS	+= -o0
-#CFLAGS	+= -Wstrict-prototypes
-#CFLAGS	+= -Wmissing-prototypes
+CFLAGS	+= -Wstrict-prototypes
+CFLAGS	+= -Wmissing-prototypes
 
 AS=nasm
 
@@ -18,13 +20,14 @@ ASFLAGS= -f elf32
 
 IMG_SECTOS = 131072
 IMG = ForgeOS.img
-VM = bochs
+HD  = HD128MB.img
+VM  = bochs
 DIR_SRC = ./src
 DIR_INC = ./src/include/
 DIR_BUILD = ./build/
 
 INC_DIRS = include/ lib/public/ lib/kernel/ lib/user kernel/ thread/ \
-			device/ user/
+			device/ user/ fs/
 
 INC = $(addprefix -I ./src/, $(INC_DIRS))
 
@@ -38,29 +41,33 @@ DIR_KERNEL = $(DIR_SRC)/kernel
 DIR_THREAD = $(DIR_SRC)/thread
 DIR_DEVICE = $(DIR_SRC)/device
 DIR_USER   = $(DIR_SRC)/user
+DIR_FS	   = $(DIR_SRC)/fs
 
 LOADER_SECTOR_CNT 	= 2
 # expr 后面的表达式运算符和操作数之间需要空格
 KERNEL_SEEK			= $(shell expr $(LOADER_SECTOR_CNT) + 1)
-# 增加到64KiB，共128个扇区
-KERNEL_SECTOR_CNT	= 128
+# 写入100KiB，共200个扇区
+KERNEL_SECTOR_CNT	= 200
 DIR_SCRIPTS = ./scripts
 
 OBJ_NAMES = kernel.o printk.a.o interrupt.a.o printk.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
 		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o keyboard.c.o \
 		ioqueue.c.o tss.c.o process.c.o syscall.c.o syscall-init.c.o number.c.o \
-		format.c.o ide.c.o
+		format.c.o ide.c.o fs.c.o inode.c.o file.c.o dir.c.o block.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
 OBJ = $(addprefix $(DIR_BUILD), $(OBJ_NAMES))
 BIN = $(addprefix $(DIR_BUILD), $(BIN_NAMES))
 
-.PHONY: all run clean
+.PHONY: all run clean hd
 
 all: $(DIR_BUILD) $(BIN) $(IMG)
-	
+hd:
+	rm -f $(HD)
+	bximage -q -mode=create -hd=128M -imgmode=flat $(HD)
+	echo "I\n./scripts/partinfo.sfdisk\nw\n" | fdisk $(HD)
 # build dir
 $(DIR_BUILD):
 	mkdir -p $(DIR_BUILD)
@@ -131,6 +138,20 @@ $(DIR_BUILD)console.c.o:$(DIR_DEVICE)/console.c $(DIR_DEVICE)/console.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译ide
 $(DIR_BUILD)ide.c.o: $(DIR_DEVICE)/ide.c $(DIR_DEVICE)/ide.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译fs
+$(DIR_BUILD)fs.c.o:	$(DIR_FS)/fs.c $(DIR_FS)/fs.h
+	$(CC) $(CFLAGS)	$(INC)	-o $@ $<
+# 编译inode
+$(DIR_BUILD)inode.c.o:$(DIR_FS)/inode.c $(DIR_FS)/inode.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译dir.c
+$(DIR_BUILD)dir.c.o:$(DIR_FS)/dir.c $(DIR_FS)/dir.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 编译file
+$(DIR_BUILD)file.c.o:$(DIR_FS)/file.c $(DIR_FS)/file.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+$(DIR_BUILD)block.c.o:$(DIR_FS)/block.c $(DIR_FS)/block.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译keybord
 $(DIR_BUILD)keyboard.c.o:$(DIR_DEVICE)/keyboard.c $(DIR_DEVICE)/keyboard.h

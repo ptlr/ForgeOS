@@ -7,17 +7,17 @@
 #include "interrupt.h"
 #include "memory.h"
 #include "list.h"
-
+#include "thread.h"
 // 硬盘操作指令
 #define CMD_IDENTIFY        0xEC    // identify指令
 #define CMD_READ_SECTOR     0x20    // 读扇区
-#define CMD_WRITE_SECOR     0x10    // 写扇区
+#define CMD_WRITE_SECOR     0x30    // 写扇区
 // ToDo: 调试后移除， 定义可读写的最大扇区数(128MiB)
 #define MAX_LBA ((128 * 1024 *1024 / 512) - 1)
 // 寄存器关键位
-#define BIT_ALT_STAT_BSY    0x80
-#define BIT_ALT_STAT_DRDY   0x40
-#define BIT_ALT_STAT_DRQ    0x08
+#define BIT_ALT_STAT_BSY    0x80    // 硬盘正忙
+#define BIT_ALT_STAT_DRDY   0x40    // 驱动器准备完成
+#define BIT_ALT_STAT_DRQ    0x08    // 硬盘数据准备完成
 #define BIT_DEV_MBS         0xA0
 #define BIT_DEV_LBA         0x40
 #define BIT_DEV_DEV         0x10
@@ -94,12 +94,18 @@ static bool busyWait(struct Disk* disk){
     {
         /* 警告： 这里由于括号导致读取状态的时候出错，无法完成busyWait
          */
+        //uint8 status = inb(REG_STATUS(channel));
+        //printkf("RH-O:: STATUS=0b%08b\n", status);
         if(!(inb(REG_STATUS(channel)) & BIT_ALT_STAT_BSY)){
+            //status = inb(REG_STATUS(channel));
+            //printkf("RH-I:: STATUS=0b%08b\n", status);
+            //return status & BIT_ALT_STAT_DRQ;
             return inb(REG_STATUS(channel)) & BIT_ALT_STAT_DRQ;
         }else{
             //printk("Busy Wait >> sleep!\n");
             msSleep(10);
             timeLimitMs -= 10;
+            printkf("TLMS:%6d", timeLimitMs);
         }  
     }
     return false;
@@ -183,19 +189,18 @@ void ideWrite(struct Disk* disk, uint32 lba, void* buf, uint32 sectorCount){
             secsOpCount = sectorCount - secsDoneCount;
         }
         selectSector(disk, lba + secsDoneCount, secsOpCount);
-        cmdOut(disk->channel, CMD_WRITE_SECOR); // 准备开始读取数据
-        semaDown(&disk->channel->seamphore);
+        cmdOut(disk->channel, CMD_WRITE_SECOR); // 准备开始写数据
         if(!busyWait(disk)){
             char error[64];
             strformat(error, "%s write sector %d failed!!!!!\n", disk->name, lba);
             PANIC(error);
         }
-
         writeSectors(disk, (void*)((uint32)buf + secsDoneCount * 512), secsOpCount);
+        // 在写数据的时候阻塞自己
+        semaDown(&disk->channel->seamphore);
         secsDoneCount += secsOpCount;
     }
     lockRelease(&disk->channel->lock);
-
 }
 // 获取硬盘参数
 static void identifyDisk(struct Disk* disk){
@@ -211,7 +216,6 @@ static void identifyDisk(struct Disk* disk){
         strformat(error, "%s identify failed!\n", disk->name);
         PANIC(error);
     }
-    //printk("ABW\n");
     readSectors(disk, idInfo, 1);
     char buff[64];
     uint8 snStart = 10 * 2;
@@ -279,20 +283,23 @@ static bool partitionInfo(struct ListElem* pelem, int arg){
     // 返回false让listTraversal遍历至末尾
     return false;
 }
-
-void intrDiskHandler(uint8 irqNum){
+// 硬盘中断处理函数
+static void intrDiskHandler(uint8 irqNum){
     ASSERT(irqNum == 0x2E || irqNum == 0x2F);
     uint8 channelNum = irqNum - 0x2E;
     struct IdeChannel* channel = &channels[channelNum];
     ASSERT(channel->irqNum == irqNum);
     /* 每次写硬盘时会申请锁， 从而保证一致性 */
+    //printk("IDH~~~~~~~\n");
     if(channel->waitingIrq){
         channel->waitingIrq = false;
         semaUp(&channel->seamphore);
+        inb(REG_STATUS(channel));   // 读取出状态，从而使硬盘继续执行新的读写
         /*uint8 statusBits =  inb(REG_STATUS(channel));
         uint8 oldColor = setColor(COLOR_BG_DARK | COLOR_FG_RED);
         //printkf("IDE IRQ_NUM = 0x%2x, STATUS = 0b%8b\n", irqNum, (uint32)statusBits);
         setColor(oldColor);*/
+        //printk("IDH_I\n");
     }
 }
 

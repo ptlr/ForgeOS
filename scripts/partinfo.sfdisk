@@ -1,0 +1,10 @@
+label: dos
+label-id: 0xa8abccea
+device: HD128MB.img
+unit: sectors
+
+HD128MB.img1 : start=        2048, size=       65536, type=83
+HD128MB.img2 : start=       67584, size=       65536, type=83
+HD128MB.img3 : start=      133120, size=      128960, type=5
+HD128MB.img5 : start=      135168, size=       65536, type=83
+HD128MB.img6 : start=      202752, size=       59328, type=83

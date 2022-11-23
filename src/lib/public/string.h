@@ -11,7 +11,7 @@
 void memset(void* dst_, uint8 value, uint32 size);
 /* 功能： 将src_开始的size个字节复制到dst_
  */
-void memcpy(void* dst_, void* src_, uint32 size);
+void memcpy(void* dst_, const void* src_, uint32 size);
 /* 功能： 连续比较a_和b_开头的开头的size个字节
  * 返回： 如果都相同返回0,若a_ > b_返回1，否则返回-1
  */

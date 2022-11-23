@@ -106,6 +106,8 @@ void* sys_malloc(uint32 size);
 void sys_free(void* ptr);
 // 回收ptr指向的内存
 void sys_free(void* ptr);
+// 分配用户物理页
+void* allocUserPages(uint32 pageCount);
 void initMem(int (* step)(void));
 uint32* getPdePtr(uint32 vaddr);
 uint32* getPtePtr(uint32 vaddr);
@@ -115,4 +117,6 @@ void* mallocAPage(enum PoolFlag pf, uint32 vaddr);
 // 获取虚拟地址（VADDR）映射的 物理地址（PADDR）
 uint32 getVaddrMapedPaddr(uint32 vaddr);
 void* allocKernelPages(uint32 pageCount);
+// 为fork的程序映射物理内存
+void* forkMapVaddr(enum PoolFlag pf, uint32 vaddr);
 #endif

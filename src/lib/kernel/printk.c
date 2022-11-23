@@ -82,6 +82,10 @@ void uint2HexStr(char* buff, uint32 num, uint32 width)
         buffIndex--;
     }
 }
+// 清屏
+void clsScreen(){
+    
+}
 void printk(const char* str){
     int index = 0;
     while (str[index] != '\0')

@@ -80,7 +80,7 @@ void* sys_malloc(uint32 size){
             arena->count = pageCount;
             arena->large = true;
             lockRelease(&memPool->lock);
-            return arena;
+            return (void*)(arena + 1);  // 跳过arena大小返回内存地址
         }else{
             lockRelease(&memPool->lock);
             return NULL;
@@ -106,7 +106,7 @@ void* sys_malloc(uint32 size){
         uint32 blockIndex;
         enum IntrStatus oldStatus = intrDisable();
         // 将arena拆分称块添加到freeList中
-        for(blockIndex = 0; blockIndex < arena->count; blockIndex++){
+        for(blockIndex = 0; blockIndex < descs[descIndex].blocksPerArena; blockIndex++){
             memBlock = arena2MemBlock(arena, blockIndex);
             ASSERT(!listFind(&arena->desc->freeList, &memBlock->freeElem));
             listAppend(&arena->desc->freeList, &memBlock->freeElem);
@@ -115,6 +115,11 @@ void* sys_malloc(uint32 size){
     }
     // 开始分配内存块
     memBlock = elem2entry(struct MemBlock, freeElem, listPop(&(descs[descIndex].freeList)));
+    // 疑问：这里为什么要设置为0？
+    // 解决疑问：在执行的过程中，申请到新内存后清0，避免脏数据影响使用
+    // 问题：此处重新置0后，释放内存时发生PF
+    // 问题原因： 在拆分arena的过程中，blockIndex的范围错误，导致地址错误
+    // 问题解决： 将'blockIndex < arena->count'更改为'blockIndex < descs[descIndex].blocksPerArena < descs[descIndex].blocksPerArena'
     memset(memBlock, 0, descs[descIndex].blockSize);
     arena = memBlock2Arena(memBlock);
     arena->count--;
@@ -469,7 +474,19 @@ static void initMemPool(uint32 maxMemSize)
     lockInit(&kernelPool.lock, "KernelMemLock");
     lockInit(&userPool.lock, "UserMemLock");
 }
-
+// 为fork的程序映射物理内存
+void* forkMapVaddr(enum PoolFlag pf, uint32 vaddr){
+    struct Pool* memPool = pf & PF_KERNEL ? &kernelPool : &userPool;
+    lockAcquire(&memPool->lock);
+    void* pagePaddr = palloc(&memPool);
+    if(pagePaddr == NULL){
+        lockRelease(&memPool->lock);
+        return NULL;
+    }
+    addPageTable(vaddr, pagePaddr);
+    lockRelease(&memPool->lock);
+    return (void*)vaddr;
+}
 void initMem(int (* step)(void))
 {
     printkf("[%02d] init memory\n", step());

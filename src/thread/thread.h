@@ -5,16 +5,18 @@
 #include "bitmap.h"
 #include "memory.h"
 
+// 每个任务可以打开的最大文件数
+#define PROC_MAX_OPEN_FILE_NUM  8
+
 // 导出就绪队列
 extern struct List readyThreadList;
 // 导出所有任务队列
 extern struct List allThreadList;
 
 /*
- *
+ * 线程需要执行的函数
  */
 typedef void thread_func(void*);
-
 /*进程或线程的状态*/
 enum TaskStatus{
     TASK_READY,
@@ -85,6 +87,10 @@ struct TaskStruct{
     struct VaddrPool userProgVaddrPool;
     // 用户进程内存块描述符
     struct MemBlockDesc userMemBlockDescs[MEM_BLOCK_TYPE_COUNT];
+    // 文件描述符数组
+    int32 fdTable[PROC_MAX_OPEN_FILE_NUM];
+    // 以根目录作为默认目录
+    uint32 cwdInodeNum;
     // 魔术，用于检测栈边界是否溢出
     uint32 stackMagic;
 };

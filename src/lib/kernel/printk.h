@@ -23,6 +23,8 @@ void putChar(uint8 asciiCh);
 /*支持二进制、8进制、10进制、16进制*/
 void putNum(uint32 num, uint32 base);
 void uint2HexStr(char* buff, uint32 num, uint32 width);
+// 清屏
+void clsScreen();
 //prink留在之后待用
 void printk(const char* str);
 void printkf(const char* fmt, ...);

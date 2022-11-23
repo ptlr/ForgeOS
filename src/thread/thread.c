@@ -76,6 +76,18 @@ void initThread(struct TaskStruct* pthread, char* name, int prio){
     pthread->elapsedTicks = 0;
     pthread->pageDir = NULL;
     pthread->selfKernelStack = (uint32*)((uint32)pthread + PAGE_SIZE);
+    // 预留标准输入输出
+    pthread->fdTable[0] = 0;
+    pthread->fdTable[1] = 1;
+    pthread->fdTable[2] = 2;
+    // 其余初始化为-1
+    int32 fdIndex = 3;
+    while(fdIndex < PROC_MAX_OPEN_FILE_NUM){
+        pthread->fdTable[fdIndex] = -1;
+        fdIndex++;
+    }
+    // 工作目录默认为根目录
+    pthread->cwdInodeNum = 0;
     // 自定义的魔数：用于检查栈溢出
     pthread->stackMagic = 0x19940520;
 }
@@ -102,7 +114,7 @@ static void implementMainThread(void){
      * 因此无需分配新的页作为PCB
      */
     kernelMainThread = runningThread();
-    initThread(kernelMainThread, "Forge Kernel",31);
+    initThread(kernelMainThread, "Forge Kernel",31); 
     // 当前线程不在ready队列中，加入到allThreadList中
     ASSERT(!listFind(&allThreadList, &kernelMainThread->allListTag));
     listAppend(&allThreadList, &kernelMainThread->allListTag);
@@ -151,6 +163,7 @@ void initThreadEnv(int (* step)(void)){
     listInit(&allThreadList);
     lockInit(&pidLock, "PidLock");
     implementMainThread();
+    //while(1);
     idleThread = startThread("IDLE", 10, IDLE, NULL);
 }
 

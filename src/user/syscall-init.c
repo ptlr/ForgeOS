@@ -4,6 +4,7 @@
 #include "syscall.h"
 #include "thread.h"
 #include "console.h"
+#include "fs.h"
 
 #define SYSCALL_COUNT  32
 typedef void* syscall;
@@ -16,11 +17,13 @@ uint32 sys_getpid(void){
 void syscallInit(int (* step)(void)){
     printkf("[%02d] init system call\n", step());
     syscallTable[SYS_GETPID] = sys_getpid;
-    syscallTable[SYS_WRITE]  = sys_write;
+    syscallTable[SYS_WRITE]  = sysWrite;
     syscallTable[SYS_MALLOC] = sys_malloc;
     syscallTable[SYS_FREE] = sys_free;
 }
+/*
 uint32 sys_write(char* str){
     consolePrint(str); 
     return strlen(str);
 }
+*/

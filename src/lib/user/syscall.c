@@ -29,7 +29,7 @@
     asm volatile(\
     "int $0x80" \
     : "=a" (retval) \
-    : "a" (NUMBER), "b" (ARGa), "c"(ARG2) \
+    : "a" (NUMBER), "b" (ARG1), "c"(ARG2) \
     : "memory" \
     ); \
     retval;\
@@ -40,7 +40,7 @@
     asm volatile(\
     "int $0x80" \
     : "=a" (retval) \
-    : "a" (NUMBER), "b" (ARG), "c"(ARG2), "d"(ARG3) \
+    : "a" (NUMBER), "b" (ARG1), "c"(ARG2), "d"(ARG3) \
     : "memory" \
     ); \
     retval;\
@@ -51,8 +51,8 @@ uint32 getpid(){
     return _syscall0(SYS_GETPID);
 }
 
-uint32 write(char* str){
-    return _syscall1(SYS_WRITE, str);
+uint32 write(int32 fd, char* str, uint32 count){
+    return _syscall3(SYS_WRITE, fd, str, count);
 }
 // 申请size字节的内存
 void* malloc(uint32 size){
@@ -60,5 +60,5 @@ void* malloc(uint32 size){
 }
 // 释放指针指向的内存
 void free(void* ptr){
-    return _syscall1(SYS_FREE, ptr);
+    _syscall1(SYS_FREE, ptr);
 }

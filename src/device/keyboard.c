@@ -81,7 +81,7 @@ static char KEY_MAP[][2] = {
 /* 0x3A */      {CAPS_LOCK_CHAR, CAPS_LOCK_CHAR}
 /* 其他按键暂不做处理 */
 };
-static void intrKeyboardHandler(){
+static void intrKeyboardHandler(void){
     bool ctrlDownLast = CTRL_STATUS;
     bool shiftDownLast = SHIFT_STATUS;
     bool capsLockDownLast = CAPS_LOCK_STATUS;

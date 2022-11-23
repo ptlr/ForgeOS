@@ -7,7 +7,6 @@
 #include "syscall.h"
 #include "number.h"
 #include "format.h"
-/*函数实现方式不安全，不建议使用*/
 uint32 printf(const char* fmt, ...)
 {
     va_list args;
@@ -20,5 +19,5 @@ uint32 printf(const char* fmt, ...)
     char buff[1024] = {0};
     format(buff, fmt, args);
     va_end(args);
-    return write(buff);
+    return write(1,buff, strlen(buff));
 }

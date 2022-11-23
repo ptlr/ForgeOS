@@ -15,11 +15,11 @@ void consoleInit(int (* step)(void)){
     lockInit(&consoleLock, "ConsoleLock");
 }
 /*获取终端*/
-void consoleAcquire(){
+void consoleAcquire(void){
     lockAcquire(&consoleLock);
 }
 /*释放终端*/
-void consoleRelease(){
+void consoleRelease(void){
     lockRelease(&consoleLock);
 }
 
