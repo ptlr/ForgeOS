@@ -17,15 +17,16 @@
 #include "stdint.h"
 #include "fs.h"
 #include "file.h"
+#include "shell.h"
 extern void kernelMain(void);
 extern void init(void);
 // init进程
 void init(void){
     uint32 retPid = fork();
     if(retPid){
-        printf("Father thread, pid is %d, child pid %d\n", getpid(), retPid);
+        while(1);
     }else{
-        printf("Child thread, pid is %d, ret pid %d\n", getpid(), retPid);
+        forgeShell();
     }
     while (1);
 }
@@ -46,6 +47,8 @@ void kernelMain(void)
     printkf("\n\n\n\n%s", MSG_KERNEL);
     initKernel();
     intrEnable();
+    clsScreen();
+    printk("[ptlr@forge /]\n$ ");
     /*processExecute(uProcA, "UPA");
     processExecute(uProcB, "UPB");
     startThread("KTA", 31, kThreadA, "KTA");

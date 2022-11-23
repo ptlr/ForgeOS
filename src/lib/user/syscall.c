@@ -66,6 +66,10 @@ void free(void* ptr){
 int16 fork(void){
     return _syscall0(SYS_FORK);
 }
+// 读取count个字节到buffer中
+int32 read(int32 fd, void* buffer, uint32 count){
+    return _syscall3(SYS_READ, fd, buffer, count);
+}
 // 显示一个字符
 void putchar(char ch){
     _syscall1(SYS_PUTCHAR, ch);

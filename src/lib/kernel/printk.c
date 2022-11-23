@@ -83,7 +83,7 @@ void uint2HexStr(char* buff, uint32 num, uint32 width)
     }
 }
 // 清屏
-void clsScreen(void){
+void sysClsScreen(void){
     uint32 screenCharCnt = 80 * 25;
     uint32 charIndex = 0;
     // 1、重置光标至开始位置

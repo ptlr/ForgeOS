@@ -27,7 +27,7 @@ DIR_INC = ./src/include/
 DIR_BUILD = ./build/
 
 INC_DIRS = include/ lib/public/ lib/kernel/ lib/user kernel/ thread/ \
-			device/ user/ fs/
+			device/ user/ fs/ shell/
 
 INC = $(addprefix -I ./src/, $(INC_DIRS))
 
@@ -42,6 +42,7 @@ DIR_THREAD = $(DIR_SRC)/thread
 DIR_DEVICE = $(DIR_SRC)/device
 DIR_USER   = $(DIR_SRC)/user
 DIR_FS	   = $(DIR_SRC)/fs
+DIR_SHELL  = $(DIR_SRC)/shell
 
 LOADER_SECTOR_CNT 	= 2
 # expr 后面的表达式运算符和操作数之间需要空格
@@ -54,7 +55,8 @@ OBJ_NAMES = kernel.o printk.a.o interrupt.a.o printk.c.o main.o interrupt.c.o\
 		init.c.o timer.c.o debug.c.o string.c.o stdio.c.o bitmap.c.o memory.c.o \
 		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o keyboard.c.o \
 		ioqueue.c.o tss.c.o process.c.o syscall.c.o syscall-init.c.o number.c.o \
-		format.c.o ide.c.o fs.c.o inode.c.o file.c.o dir.c.o block.c.o fork.c.o
+		format.c.o ide.c.o fs.c.o inode.c.o file.c.o dir.c.o block.c.o fork.c.o \
+		shell.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -167,6 +169,9 @@ $(DIR_BUILD)process.c.o: $(DIR_USER)/process.c $(DIR_USER)/process.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # fork
 $(DIR_BUILD)fork.c.o : $(DIR_USER)/fork.c $(DIR_USER)/fork.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# shell
+$(DIR_BUILD)shell.c.o : $(DIR_SHELL)/shell.c $(DIR_SHELL)/shell.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # syscall
 $(DIR_BUILD)syscall.c.o : $(DIR_USER_LIB)/syscall.c $(DIR_USER_LIB)/syscall.h
