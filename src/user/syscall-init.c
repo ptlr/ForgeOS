@@ -22,4 +22,6 @@ void syscallInit(int (* step)(void)){
     syscallTable[SYS_MALLOC] = sys_malloc;
     syscallTable[SYS_FREE] = sys_free;
     syscallTable[SYS_FORK] = sysFork;
+    syscallTable[SYS_PUTCHAR] = putChar;
+    syscallTable[SYS_CLEAR] = clsScreen;
 }

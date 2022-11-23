@@ -7,7 +7,9 @@ enum SYSCALL_NR{
     SYS_WRITE,
     SYS_MALLOC,
     SYS_FREE,
-    SYS_FORK
+    SYS_FORK,
+    SYS_PUTCHAR,
+    SYS_CLEAR
 };
 // 获取进程PID
 uint32 getpid(void);
@@ -19,4 +21,8 @@ void* malloc(uint32 size);
 void free(void* ptr);
 // 创建子进程
 int16 fork(void);
+// 显示一个字符
+void putchar(char ch);
+// 清空屏幕
+void clsScreen(void);
 #endif

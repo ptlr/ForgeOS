@@ -84,7 +84,17 @@ void uint2HexStr(char* buff, uint32 num, uint32 width)
 }
 // 清屏
 void clsScreen(void){
-    
+    uint32 screenCharCnt = 80 * 25;
+    uint32 charIndex = 0;
+    // 1、重置光标至开始位置
+    setCursor(0);
+    // 2、清空屏幕
+    while(charIndex < screenCharCnt){
+        putChar(' ');
+        charIndex++;
+    }
+    // 3、设置光标
+    setCursor(0);
 }
 void printk(const char* str){
     int index = 0;

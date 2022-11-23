@@ -66,3 +66,11 @@ void free(void* ptr){
 int16 fork(void){
     return _syscall0(SYS_FORK);
 }
+// 显示一个字符
+void putchar(char ch){
+    _syscall1(SYS_PUTCHAR, ch);
+}
+// 清空屏幕
+void clsScreen(void){
+    _syscall0(SYS_CLEAR);
+}
