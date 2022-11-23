@@ -9,6 +9,9 @@
 #include "debug.h"
 #include "thread.h"
 #include "console.h"
+#include "keyboard.h"
+#include "ioqueue.h"
+
 // 当前分区,挂载文件系统使用
 struct Partition* currentPart;
 static bool mountPartition(struct ListElem* partElem,int arg){
@@ -375,13 +378,26 @@ int32 sysWrite(uint32 fd, const void* buffer, uint32 count){
 }
 // 从文件描述符fd中读取count个字节到buffer,成功返回读取的字节数，失败返回-1
 int32 sysRead(uint32 fd, void* buffer, uint32 count){
-    if(fd < 0){
+    int32 retVal = -1;
+    if(fd < 0 || fd == STD_OUT || fd == STD_ERR){
         printk("FS_SYS_READ: fd error\n");
         return -1;
+    }else if(fd == STD_IN){
+        char* mBuffer = buffer;
+        uint32 readByteCnt = 0;
+        while(readByteCnt < count){
+            *mBuffer = ioqGetChar(&KBD_BUFFER);
+            readByteCnt++;
+            mBuffer++;
+        }
+        retVal = (readByteCnt == 0 ? -1 : (int32)readByteCnt);
+    }else{
+        uint32 gfd = fdLocal2Global(fd);
+        retVal = fileRead(&fileTable[gfd], buffer, count);
     }
     ASSERT(buffer != NULL);
-    uint32 gfd = fdLocal2Global(fd);
-    return fileRead(&fileTable[gfd], buffer, count);
+    
+    return retVal;
 }
 // 重置用于文件读写操作的偏移指针，成功时返回偏移量，失败时返回-1
 int32 sysLSeek(int32 fd, int offset, uint8 whence){
