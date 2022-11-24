@@ -15,6 +15,9 @@
 static char cmdLine[CMD_LENGTH] = {0};
 // 用来缓存当前的目录
 char cwDCache[128] = {0};
+// argc和argv必须为全局变量，便于全局调用
+char* argv[MAX_ARG_NUM];
+int32 argc = -1;
 // 输出终端提示
 void printPrompt(void){
     printf("[ptlr@forge %s]\n$ ", cwDCache);
@@ -62,6 +65,42 @@ static void readLine(char* buffer, int32 count){
     }
     printf("readLine: can't find enter key in the cmdLine, max number of char is 128\n");
 }
+// 命令解析函数
+static int32 cmdParse(char* cmdStr, char** argv, char token){
+    ASSERT(cmdStr != NULL);
+    int32 argIndex = 0;
+    while(argIndex < MAX_ARG_NUM){
+        argv[argIndex] = NULL;
+        argIndex++;
+    }
+    char* next = cmdStr;
+    int32  argc = 0;
+    // 处理整行
+    while(*next){
+        // 去除命令行之间的空格
+        while(*next == token){
+            next++;
+        }
+        // 处理最后一个参数后接空格的情况
+        if(*next == 0){
+            break;
+        }
+        argv[argc] = next;
+        // 处理每个命令子及参数
+        while(*next && *next != token){
+            next++;
+        } 
+        // 如果未结束（遇到token字符），使该token替换成0
+        if(*next){
+            *next++ = 0;
+        }
+        if(argc > MAX_ARG_NUM){
+            return -1;
+        }
+        argc++; 
+    }
+    return argc;
+}
 // 简单的shell
 void forgeShell(void){
     cwDCache[0] = '/';
@@ -74,5 +113,16 @@ void forgeShell(void){
         if(cmdLine[0] == 0){
             continue;
         }
+        argc = -1;
+        argc = cmdParse(cmdLine, argv, ' ');
+        if(argc == -1){
+            printf("number of arguments exeed %d\n", MAX_ARG_NUM);
+        }
+        int32 argIndex = 0;
+        while(argIndex < argc){
+            printf("%s ", argv[argIndex]);
+            argIndex++;
+        }
+        printf("\n");
     }
 }

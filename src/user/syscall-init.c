@@ -25,4 +25,16 @@ void syscallInit(int (* step)(void)){
     syscallTable[SYS_READ] = sysRead;
     syscallTable[SYS_PUTCHAR] = putChar;
     syscallTable[SYS_CLEAR] = sysClsScreen;
+    syscallTable[SYS_GETCWD] = sysGetCwd;
+    syscallTable[SYS_OPEN] = sysOpen;
+    syscallTable[SYS_CLOSE] = sysClose;
+    syscallTable[SYS_LSEEK] = sysLSeek;
+    syscallTable[SYS_UNLINK] = sysUnlink;
+    syscallTable[SYS_MKDIR] = sysMkdir;
+    syscallTable[SYS_OPENDIR] = sysOpendir;
+    syscallTable[SYS_CLOSEDIR] = sysOpendir;
+    syscallTable[SYS_READDIR] = sysReadDirEntry;
+    syscallTable[SYS_REWINDDIR] = sysRewinddir;
+    syscallTable[SYS_STAT] = sysStat;
+    syscallTable[SYS_PS] = sysPs;
 }

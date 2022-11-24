@@ -78,3 +78,55 @@ void putchar(char ch){
 void clsScreen(void){
     _syscall0(SYS_CLEAR);
 }
+// 获取当前工作目录
+char* getcwd(char* buffer, uint32 size){
+    return _syscall2(SYS_GETCWD, buffer, size);
+}
+// 以flag方式打开文件pathName
+int32 open(char* pathName, uint8 flag){
+    return _syscall2(SYS_OPEN, pathName, flag);
+}
+// 关闭文件
+int32 close(int32 fd){
+    return _syscall1(SYS_CLOSE, fd);
+}
+// 删除文件path
+int32 unlink(const char* path){
+    return _syscall1(SYS_UNLINK, path);
+}
+// 创建目录
+int32 mkdir(const char* path){
+    return _syscall1(SYS_MKDIR, path);
+}
+// 打开目录
+struct Dir* opendir(const char* name){
+    return _syscall1(SYS_OPENDIR, name);
+}
+// 关闭目录dir
+int32 closedir(struct Dir* dir){
+    return _syscall1(SYS_CLOSEDIR, dir);
+}
+// 删除目录
+int32 rmdir(const char* name){
+    return _syscall1(SYS_RMDIR, name);
+}
+// 读取目录
+struct DirEntry* readdir(struct Dir* dir){
+    return _syscall1(SYS_READDIR, dir);
+}
+// 重置目录指针
+void rewinddir(struct Dir* dir){
+    _syscall1(SYS_REWINDDIR, dir);
+}
+// 获取文件属性
+int32 stat(const char* path, struct Status* status){
+    return _syscall2(SYS_STAT, path, status);
+}
+// 改变工作目录path
+int32 chdir(const char* path){
+    return _syscall1(SYS_CHDIR, path);
+}
+// 显示任务列表
+void ps(void){
+    _syscall0(SYS_PS);
+}

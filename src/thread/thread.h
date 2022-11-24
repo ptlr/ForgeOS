@@ -119,4 +119,6 @@ void threadUnblock(struct TaskStruct* thread);
 void threadYeild(void);
 // forkPid
 int16 forkPid(void);
+// 输出进程信息
+void sysPs(void);
 #endif

@@ -8,6 +8,8 @@
 #include "debug.h"
 #include "process.h"
 #include "console.h"
+#include "fs.h"
+#include "file.h"
 extern void init(void);
 // 主线程
 struct TaskStruct* kernelMainThread;
@@ -200,4 +202,46 @@ void threadUnblock(struct TaskStruct* thread){
 // forkPid
 int16 forkPid(void){
     return allocatePid();
+}
+static bool threadInfo(struct ListElem* elem, int arg){
+    struct TaskStruct* thread = elem2entry(struct TaskStruct, allListTag, elem);
+    char ppid[16] = {0};
+    char status[16]  = {0};
+    char name[32]  = {0};
+    if(thread->ppid == -1){
+        strcpy(ppid, "NULL");
+    }else{
+        strformat(ppid, "%d", thread->ppid);
+    }
+    switch (thread->status)
+    {
+        case TASK_RUNNING:
+        strcpy(status, "RUNNING");
+        break;
+        case TASK_READY:
+        strcpy(status, "READY");
+        break;
+        case TASK_BLOCKED:
+        strcpy(status, "BLOCKED");
+        break;
+        case TASK_WAITING:
+        strcpy(status, "WAITING");
+        break;
+        case TASK_HANGING:
+        strcpy(status, "HANGING");
+        break;
+        strcpy(status, "DIED");
+        case TASK_DIED:
+        break;
+    }
+    char buffer[128] = {0};
+    strformat(buffer, "%16d%16s%16s%16d%16s\n", thread->pid, ppid, status, thread->elapsedTicks, thread->name);
+    sysWrite(STD_OUT, buffer, strlen(buffer));
+    return false;
+}
+// 输出进程信息
+void sysPs(void){
+    char* psTitle = "PID             PPID            STATUS          TICKS           COMMAND\n";
+    sysWrite(STD_OUT, psTitle, strlen(psTitle));
+    listTraversal(&allThreadList, threadInfo, 0);
 }
