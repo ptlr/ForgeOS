@@ -147,7 +147,7 @@ static void partitionFormat(struct Partition* part){
     sys_free(buffer);
 }
 // 将最上层的路劲解析出来
-static char* pathParse(char* path, char* nameStore){
+char* pathParse(char* path, char* nameStore){
     if(path[0] == '/'){
         /* 如果路径中出现多个'/'，比如'///a/b/c'时，忽略多余的'/' */
         while (*(++path) == '/');
@@ -185,7 +185,7 @@ int searchFile(const char* pathName, struct PathSearchRecord* searchRecord){
         return 0;
     }
     uint32 pathLen = strlen(pathName);
-    ASSERT(pathName[0] == '/' && pathLen > 1 && pathLen < MAX_PATH_LEN);
+    ASSERT((pathName[0] == '/') && (pathLen > 1) && (pathLen < MAX_PATH_LEN));
     char* subPath = (char*)pathName;
     struct Dir* parentDir = &rootDir;
     struct DirEntry dirEntry;

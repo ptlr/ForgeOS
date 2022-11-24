@@ -41,6 +41,8 @@ struct Status{
 };
 // 导出currentPart
 extern struct Partition* currentPart;
+// 将最上层的路劲解析出来
+char* pathParse(char* path, char* nameStore);
 // 返回路劲深度
 int32 pathDepthCnt(char* path);
 /* 搜索文件pathName, 如果找到返回inode号，否则返回-1 */
