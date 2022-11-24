@@ -70,7 +70,7 @@ void inodeDelete(struct Partition* part, uint32 inodeNum, void* ioBuff){
     ASSERT(inodeNum < 4096);
     struct InodePosition inodePos;
     inodeLocate(part, inodeNum, &inodePos);
-    printkf("IPOS: SecLBA=%d, Offset=%d, TwoSec=%d\n", inodePos.sectorLBA, inodePos.offset, inodePos.twoSector);
+    //printkf("IPOS: SecLBA=%d, Offset=%d, TwoSec=%d\n", inodePos.sectorLBA, inodePos.offset, inodePos.twoSector);
     char* inodeBuf = (char*)ioBuff;
     uint32 sectorCnt = inodePos.twoSector == true ? 2 : 1;
     ideRead(part->disk, inodePos.sectorLBA, inodeBuf, sectorCnt);
