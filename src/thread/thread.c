@@ -207,7 +207,6 @@ static bool threadInfo(struct ListElem* elem, int arg){
     struct TaskStruct* thread = elem2entry(struct TaskStruct, allListTag, elem);
     char ppid[16] = {0};
     char status[16]  = {0};
-    char name[32]  = {0};
     if(thread->ppid == -1){
         strcpy(ppid, "NULL");
     }else{
@@ -235,7 +234,7 @@ static bool threadInfo(struct ListElem* elem, int arg){
         break;
     }
     char buffer[128] = {0};
-    strformat(buffer, "%16d%16s%16s%16d%16s\n", thread->pid, ppid, status, thread->elapsedTicks, thread->name);
+    strformat(buffer, "%4d%16s%16s%16d%16s\n", thread->pid, ppid, status, thread->elapsedTicks, thread->name);
     sysWrite(STD_OUT, buffer, strlen(buffer));
     return false;
 }
