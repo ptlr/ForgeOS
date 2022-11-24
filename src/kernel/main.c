@@ -47,7 +47,7 @@ void kernelMain(void)
     printkf("\n\n\n\n%s", MSG_KERNEL);
     initKernel();
     intrEnable();
-    clsScreen();
+    clear();
     printk("[ptlr@forge /]\n$ ");
     /*processExecute(uProcA, "UPA");
     processExecute(uProcB, "UPB");
@@ -90,7 +90,7 @@ void cfile(void){
 void ofile(void){
     uint32 fd = sysOpen(firstFile, O_RDWR);
 }
-void mkdir(void){
+void mkdirTest(void){
     printf("[MKDIR01] '%s' creat %s!\n",dir1, sysMkdir(dir1) == 0 ? "done" : "failed");
     printf("[MKDIR02] '/dir1' creat %s!\n", sysMkdir("/dir1") == 0 ? "done" : "failed");
     printf("[MKDIR03] '%s' creat %s!\n",dir1, sysMkdir(dir1) == 0 ? "done" : "failed");
@@ -105,7 +105,7 @@ void mkdir(void){
         sysClose(fd);
     }
 }
-void opendir(void){
+void opendirTest(void){
     struct Dir* parentDir = sysOpendir(dir1);
     if(parentDir){
         printf("'%s' open done!\ncontent:\n", dir1);
