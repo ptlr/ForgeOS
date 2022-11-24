@@ -133,7 +133,9 @@ static void intrKeyboardHandler(void){
            (scanCode == 0x28) || (scanCode == 0x33) ||
            /* */
            (scanCode == 0x34) || (scanCode == 0x35)){
-            if(shiftDownLast) shift = true;
+            if(shiftDownLast){
+                shift = true;
+            }
         }else{
             if(shiftDownLast && capsLockDownLast){
                 shift = false;
@@ -142,43 +144,43 @@ static void intrKeyboardHandler(void){
             }else{
                 shift = false;
             }
-            uint8 index = (scanCode &=0x00FF); //将扫描码高8位置0，针对高字节是0xE0的扫描码
-            char currentChar = KEY_MAP[index][shift];
-            // 如果字符可见，输出
-            if(currentChar){
-                // 在此处添加快捷键处理
-                if((ctrlDownLast && currentChar == 'l') || (ctrlDownLast && currentChar == 'u')){
-                    currentChar -= 'a';
-                }
-                if(!ioqIsFull(&KBD_BUFFER)){
-                    //putChar(currentChar);
-                    ioqPutChar(&KBD_BUFFER, currentChar);
-                }
-                return;
+        }
+        uint8 index = (scanCode &=0x00FF); //将扫描码高8位置0，针对高字节是0xE0的扫描码
+        char currentChar = KEY_MAP[index][shift];
+        //printkf("KBD: INDEX=%2d,SHIFT=%2d\n",index, shift);
+        // 如果字符可见，输出
+        if(currentChar){
+            // 在此处添加快捷键处理
+            if((ctrlDownLast && currentChar == 'l') || (ctrlDownLast && currentChar == 'u')){
+                currentChar -= 'a';
             }
-            switch (scanCode)
-            {
+            if(!ioqIsFull(&KBD_BUFFER)){
+                //putChar(currentChar);
+                ioqPutChar(&KBD_BUFFER, currentChar);
+            }
+            return;
+        }
+        switch (scanCode)
+        {
             case CTRL_L_MAKE:
             case CTRL_R_MAKE:
                 CTRL_STATUS = true;
-                break;
+            break;
             case SHIFT_L_MAKE:
             case SHIFT_R_MAKE:
                 SHIFT_STATUS = true;
-                break;
+            break;
             case ALT_L_MAKE:
             case ALT_R_MAKE:
                 ALT_STATUS = true;
-                break;
+            break;
             case CAPS_LOCK_MAKE:
             CAPS_LOCK_STATUS = !CAPS_LOCK_STATUS;
-                break;
-            }
+            break;
         }
     }else{
         logWarning("UnSupport key\n");
     }
-    return;
 }
 void initKeyboard(int (* step)(void)){
     printkf("[%02d] init keyboard\n", step());
