@@ -41,7 +41,7 @@ int32 read(int32 fd, void* buffer, uint32 count);
 // 显示一个字符
 void putchar(char ch);
 // 清空屏幕
-void clsScreen(void);
+void clear(void);
 // 获取当前工作目录
 char* getcwd(char* buffer, uint32 size);
 // 以flag方式打开文件pathName

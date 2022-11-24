@@ -31,8 +31,10 @@ void syscallInit(int (* step)(void)){
     syscallTable[SYS_LSEEK] = sysLSeek;
     syscallTable[SYS_UNLINK] = sysUnlink;
     syscallTable[SYS_MKDIR] = sysMkdir;
+    syscallTable[SYS_RMDIR] = sysRmdir;
     syscallTable[SYS_OPENDIR] = sysOpendir;
-    syscallTable[SYS_CLOSEDIR] = sysOpendir;
+    syscallTable[SYS_CLOSEDIR] = sysCloseDir;
+    syscallTable[SYS_CHDIR] = sysChdir;
     syscallTable[SYS_READDIR] = sysReadDirEntry;
     syscallTable[SYS_REWINDDIR] = sysRewinddir;
     syscallTable[SYS_STAT] = sysStat;

@@ -75,12 +75,12 @@ void putchar(char ch){
     _syscall1(SYS_PUTCHAR, ch);
 }
 // 清空屏幕
-void clsScreen(void){
+void clear(void){
     _syscall0(SYS_CLEAR);
 }
 // 获取当前工作目录
 char* getcwd(char* buffer, uint32 size){
-    return _syscall2(SYS_GETCWD, buffer, size);
+    return (char*)_syscall2(SYS_GETCWD, buffer, size);
 }
 // 以flag方式打开文件pathName
 int32 open(char* pathName, uint8 flag){
@@ -100,7 +100,7 @@ int32 mkdir(const char* path){
 }
 // 打开目录
 struct Dir* opendir(const char* name){
-    return _syscall1(SYS_OPENDIR, name);
+    return (struct Dir*)_syscall1(SYS_OPENDIR, name);
 }
 // 关闭目录dir
 int32 closedir(struct Dir* dir){
@@ -112,7 +112,7 @@ int32 rmdir(const char* name){
 }
 // 读取目录
 struct DirEntry* readdir(struct Dir* dir){
-    return _syscall1(SYS_READDIR, dir);
+    return (struct DirEntry*)_syscall1(SYS_READDIR, dir);
 }
 // 重置目录指针
 void rewinddir(struct Dir* dir){
