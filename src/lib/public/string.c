@@ -1,4 +1,3 @@
-#include "debug.h"
 #include "string.h"
 #include "constant.h"
 #include "../include/stdint.h"
@@ -6,6 +5,7 @@
 #include "stdarg.h"
 #include "console.h"
 #include "format.h"
+#include "assert.h"
 //内存相关
 
 /* 功能：将从dst_开始size个字节设置为value
@@ -13,7 +13,7 @@
  */
 void memset(void* dst_, uint8 value, uint32 size)
 {
-    ASSERT(dst_ != NULL);
+    assert(dst_ != NULL);
     uint8* dst = (uint8*)dst_;
     for(uint32 index = 0; index < size; index++)
     {
@@ -24,7 +24,7 @@ void memset(void* dst_, uint8 value, uint32 size)
  */
 void memcpy(void* dst_, const void* src_, uint32 size)
 {
-    ASSERT(dst_!= NULL && src_ != NULL);
+    assert(dst_!= NULL && src_ != NULL);
     uint8* dst = (uint8*)dst_;
     const uint8* src = (uint8*) src_;
     while (size-- > 0)
@@ -40,7 +40,7 @@ int memcmp(void* a_, void* b_, uint32 size)
 {
     const char* a = a_;
     const char* b = b_;
-    ASSERT(a != NULL && b != NULL);
+    assert(a != NULL && b != NULL);
     while (size-- > 0){
         if(*a != *b){
             return *a > *b ? 1 : -1;
@@ -56,7 +56,7 @@ int memcmp(void* a_, void* b_, uint32 size)
  */
 char* strcpy(char* dst_, const char* src_)
 {
-    ASSERT(dst_ != NULL && src_ != NULL);
+    assert(dst_ != NULL && src_ != NULL);
     char* r = dst_;
     /*
      *
@@ -69,7 +69,7 @@ char* strcpy(char* dst_, const char* src_)
  */
 char* strcat(char* dst_, const char* src_)
 {
-    ASSERT(dst_ != NULL && src_ != NULL);
+    assert(dst_ != NULL && src_ != NULL);
     char* str = dst_;
     // 定位至dst_最后一个位置
     while (*str++);
@@ -96,7 +96,7 @@ char* strrepeatapp(char* str, const char ch, int32 repeat){
  */
 uint32 strlen(const char* str)
 {
-    ASSERT(str != NULL);
+    assert(str != NULL);
     /* 原理: 字符串以0结尾，用*p++遍历时，会到*p = 0时，结束循环
      * 返回：每个字符占用一个字节，利用地址相减再减1就是长度
      */
@@ -110,7 +110,7 @@ uint32 strlen(const char* str)
  */
 int8 strcmp(const char* a, const char* b)
 {
-    ASSERT(a != NULL && b != NULL);
+    assert(a != NULL && b != NULL);
     while (*a != 0 && *a == *b)
     {
         a++;
@@ -127,7 +127,7 @@ int8 strcmp(const char* a, const char* b)
  */
 char* strchr(const char* str, const uint8 ch)
 {
-    ASSERT(str != NULL);
+    assert(str != NULL);
     while (*str != 0)
     {
         if(*str == ch) return (char*)str;
@@ -140,7 +140,7 @@ char* strchr(const char* str, const uint8 ch)
  */
 char* strrchr(const char* str, const uint8 ch)
 {
-    ASSERT(str != NULL);
+    assert(str != NULL);
     const char* lastChar = NULL;
     while (*str != 0)
     {
@@ -156,7 +156,7 @@ char* strrchr(const char* str, const uint8 ch)
  */
 uint32 strchrs(const char* str, const uint8 ch)
 {
-    ASSERT(str != NULL);
+    assert(str != NULL);
     uint32 chCnt = 0;
     const char* p = str;
     while (*p != 0)

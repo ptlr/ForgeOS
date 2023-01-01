@@ -7,7 +7,8 @@
 
 // 每个任务可以打开的最大文件数
 #define PROC_MAX_OPEN_FILE_NUM  8
-
+// 任务名称长度
+#define TASK_NAME_LEN   32
 // 导出就绪队列
 extern struct List readyThreadList;
 // 导出所有任务队列
@@ -72,7 +73,7 @@ struct TaskStruct{
     int16 pid;
     enum TaskStatus status;
     uint8 priority;
-    char name[32];
+    char name[TASK_NAME_LEN];
     // 每次在线程上运行的滴答数
     uint8 ticks;
     // 此任务占用了CPU多少个滴答数，即运行了多长时间

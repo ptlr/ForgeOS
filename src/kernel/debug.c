@@ -14,7 +14,6 @@ void panicSpin(char* fileName, int line, const char* func, const char* condition
     printk("CONDITION: ");printk(condition);printk("\n");
     while (1);
 }
-
 static void log(const char* msg, uint8 color){
     enum IntrStatus oldStatus = intrDisable();
     uint8 oldColor = setColor(color);

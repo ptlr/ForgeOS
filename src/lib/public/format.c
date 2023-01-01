@@ -2,8 +2,7 @@
 #include "constant.h"
 #include "string.h"
 #include "number.h"
-#include "debug.h"
-
+#include "assert.h"
 enum Alignment{
     ALIGN_LFET      = 0,
     ALIGN_CENTER    = 1,
@@ -43,7 +42,6 @@ static int32 decodeFormat(const char* fmt, struct FormatData* formatData){
     }
     // 检查数据格式
     // 此时fmtchar的内容应该为b, d, x, c, s
-    //ASSERT(((fmtChar == 'b') || (fmtChar == 'd') || (fmtchar == 'x') || (fmtChar == 'c') || (fmtChar == 's')));
     formatData->specifier = fmtChar;
     count += 1;
     return count;  
@@ -151,7 +149,7 @@ uint32 format(char* str, const char* fmt, va_list ap){
             bufPtr += strlen(argStr);
             break;
         default:
-            PANIC("string format:: unexpected specifier");
+            painc("string format:: unexpected specifier");
             break;
         }
         indexChar = *(++indexPtr);

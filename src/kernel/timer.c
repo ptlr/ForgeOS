@@ -14,12 +14,9 @@ uint32 ticks = 0;
 // 以tick为单位的sleep, 任何以时间为单位的睡眠都会转成ticks的形式
 static void tickSleep(uint32 sleepTicks){
     uint32 startTick = ticks;
-    uint32 durationTick = 0;
     while(ticks -  startTick < sleepTicks){
         threadYeild();
     }
-    durationTick = ticks - startTick;
-    printkf("ST = %8d, CT: %8d, DT: %8d, Time: %8dms\n", startTick, ticks, durationTick, durationTick * 1000);
 }
 // 以毫秒秒为时间单位的睡眠
 void msSleep(uint32 msecs){

@@ -18,6 +18,7 @@
 #include "fs.h"
 #include "file.h"
 #include "shell.h"
+#include "timer.h"
 extern void kernelMain(void);
 extern void init(void);
 // init进程
@@ -26,9 +27,9 @@ void init(void){
     if(retPid){
         while(1);
     }else{
+        sleep(100 * 1000);
         forgeShell();
     }
-    while (1);
 }
 char* MSG_KERNEL = "[05] kernel start\n";
 char* firstFile = "/first";
@@ -42,13 +43,14 @@ void kThreadA(void*);
 void kThreadB(void*);
 void uProcA(void);
 void uProcB(void);
+void copyProg(void);
 void kernelMain(void)
 {
     printkf("\n\n\n\n%s", MSG_KERNEL);
     initKernel();
-    intrEnable();
+    //copyProg();
     clear();
-    printk("[ptlr@forge /]\n$ ");
+    //printk("[ptlr@forge /]\n$ ");
     /*processExecute(uProcA, "UPA");
     processExecute(uProcB, "UPB");
     startThread("KTA", 31, kThreadA, "KTA");
@@ -61,6 +63,27 @@ void kernelMain(void)
     //cwdTest();
     //fileInfoTest();
     while(1);
+}
+// 复制程序
+void copyProg(void){
+    char* fileName = "/prog-no-arg";
+    uint32 fileSize = 14596;
+    uint32 fileSecCnt = DIV_ROUND_UP(fileSize, 512);
+    struct Disk* sda = &channels[0].devices[0];
+    void* fileBuff = sys_malloc(fileSize);
+    ideRead(sda, 300, fileBuff, fileSecCnt);
+    uint8* buff = (uint8*)fileBuff;
+    //printkf("HEAD=%02x%02x%02x, CNT=%2d\n",buff[0],buff[1], buff[2], fileSecCnt);
+    int32 fd = sysOpen(fileName, O_CREAT | O_RDWR);
+    if(fd != -1){
+        if(sysWrite(fd, fileBuff, fileSize) == -1){
+            printk("file write error!\n");
+            while(1);
+        }
+    }else{
+        printk("CF: can't open file!\n");
+    }
+    
 }
 // 文件信息测试
 void fileInfoTest(void){

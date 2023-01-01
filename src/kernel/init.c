@@ -8,7 +8,7 @@
 #include "syscall-init.h"
 #include "ide.h"
 #include "fs.h"
-
+#include "interrupt.h"
 static int step = 6;
 static int currentStep(void){
     step += 1;
@@ -25,6 +25,7 @@ void initKernel(void)
     initKeyboard(currentStep);
     initTss(currentStep);
     syscallInit(currentStep);
+    intrEnable();
     initIDE(currentStep);
     initFileSystem(currentStep);
 }

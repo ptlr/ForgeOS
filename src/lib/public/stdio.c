@@ -1,7 +1,6 @@
 #include "stdio.h"
 #include "printk.h"
 #include "../include/stdint.h"
-#include "debug.h"
 #include "string.h"
 #include "interrupt.h"
 #include "syscall.h"

@@ -46,6 +46,7 @@ static void copyBodyStack3(struct TaskStruct* childThread, struct TaskStruct* pa
             while (bitIndex < 8)
             {
                 progVaddr = (byteIndex * 8 + bitIndex) * PAGE_SIZE + vaddrStart;
+                //printkf("FORK:: PROG_VADDR:0x%08x\n", progVaddr);
                 if(!((BITMAP_MASK << bitIndex) & vaddrBitmap[byteIndex])){
                     bitIndex++;
                     continue;

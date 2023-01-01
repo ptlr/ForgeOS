@@ -48,6 +48,7 @@ void* sys_malloc(uint32 size){
     uint32 poolSize;
     struct MemBlockDesc* descs;
     struct TaskStruct* currentThread = runningThread();
+    //printkf("TN=%s => A\n",currentThread->name);
     // 根据线程pageDir是否被初始化判断用那个内存池
     if(currentThread->pageDir == NULL){
         //logWarning("allock\n");
@@ -64,6 +65,7 @@ void* sys_malloc(uint32 size){
         memPool = &userPool;
         descs = currentThread->userMemBlockDescs;
     }
+    //printk("A\n");
     // 如果申请的内存大小大于内存池大小返回NULL
     if (!(size > 0 && size < poolSize)) return NULL;
     struct Arena* arena;
@@ -113,17 +115,20 @@ void* sys_malloc(uint32 size){
         }
         setIntrStatus(oldStatus);
     }
+    //struct ListElem* elem = listPop(&(descs[descIndex].freeList));
+    //printkf("VADDR:0x%08x\n", &(descs[descIndex].freeList));
     // 开始分配内存块
     memBlock = elem2entry(struct MemBlock, freeElem, listPop(&(descs[descIndex].freeList)));
     // 疑问：这里为什么要设置为0？
     // 解决疑问：在执行的过程中，申请到新内存后清0，避免脏数据影响使用
     // 问题：此处重新置0后，释放内存时发生PF
     // 问题原因： 在拆分arena的过程中，blockIndex的范围错误，导致地址错误
-    // 问题解决： 将'blockIndex < arena->count'更改为'blockIndex < descs[descIndex].blocksPerArena < descs[descIndex].blocksPerArena'
+    // 问题解决： 将'blockIndex < arena->count'更改为'blockIndex < descs[descIndex].blocksPerArena'
     memset(memBlock, 0, descs[descIndex].blockSize);
     arena = memBlock2Arena(memBlock);
     arena->count--;
     lockRelease(&memPool->lock);
+    //printkf("ALLOC-VADDR:0x%08x\n",memBlock);
     return (void*)memBlock;
 }
 // 回收ptr指向的内存
@@ -140,19 +145,23 @@ void sys_free(void* ptr){
         pf = PF_USER;
         memPool = &userPool;
     }
+    //printkf("TN=%s => R\n",runningThread()->name);
     lockAcquire(&memPool->lock);
     struct MemBlock* memBlock = ptr;
     struct Arena* arena = memBlock2Arena(memBlock);
+    //printkf("AVADDR: 0x%08x, VADDR:0x%08x, LARGE=0x%08d\n", arena, ptr, arena->large);
     ASSERT(arena->large == 0 || arena->large == 1);
     if(arena->desc == NULL && arena->large == true){
         // 大于1024B的内存
         mfreePage(pf, arena, arena->count);
     }else{
         // 小于1024B的内存
-        // 先将内存块放回收到freeList
+        // 先将内存块放回收到freeList，回收时不对内存进行清零
         listAppend(&arena->desc->freeList, &memBlock->freeElem);
         // 判断arena中的内存块是否都是空闲
         if(++arena->count == arena->desc->blocksPerArena){
+            //printk("Release PAGE!\n");
+            // 空闲时移除全部的块并释放内存
             uint32 blockIndex;
             for(blockIndex = 0; blockIndex < arena->desc->blocksPerArena; blockIndex++){
                 struct MemBlock* memBlock = arena2MemBlock(arena, blockIndex);
@@ -388,7 +397,8 @@ void* mallocAPage(enum PoolFlag pf, uint32 vaddr){
     uint32 bitIndex = -1;
     if(currThread->pageDir != NULL && pf == PF_USER){
         bitIndex = (vaddr - currThread->userProgVaddrPool.vaddrStart) / PAGE_SIZE;
-        ASSERT(bitIndex > 0);
+        //printkf("UBMVADDR:0x%08x, INDEX=0x%08x\n", currThread->userProgVaddrPool.vaddrStart, bitIndex);
+        ASSERT(bitIndex >= 0);
         setBitmap(&currThread->userProgVaddrPool.vaddrBitmap, bitIndex, 1);
     }else if(currThread->pageDir != NULL && pf == PF_KERNEL){
         bitIndex = (vaddr - kernelVaddr.vaddrStart) / PAGE_SIZE;

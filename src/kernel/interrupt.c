@@ -16,8 +16,6 @@ char* intrNames[IDT_DESC_CNT];
 extern intrHandler intrEntryTable[IDT_DESC_CNT];
 // 中断处理程序（C）
 intrHandler intrHandlerTable[IDT_DESC_CNT];
-// 系统调用
-extern uint32 syscallHandler(void);
 
 static void generalIntrHandler(uint8 intrVecNum)
 {
