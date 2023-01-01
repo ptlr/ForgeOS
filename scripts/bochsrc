@@ -1,13 +1,13 @@
 # ‘#’后面的内容为注释内容
 # 设置bochs在运行过程中使用的内存
 #memory: host=32, guest=32
-memory: host=32, guest=512
+memory: host=64, guest=512
 # diplay option
 #isplay_library: wx
 #,options="gui_debug"
 # 设置对应真实机器的BIOS和VGA BIOS
-romimage: file="/usr/share/bochs/BIOS-bochs-latest", address=0x00000000, options=none
-vgaromimage: file="/usr/share/bochs/VGABIOS-lgpl-latest"
+romimage: file="/usr/local/share/bochs/BIOS-bochs-latest", address=0x00000000, options=none
+vgaromimage: file="/usr/local/share/bochs/VGABIOS-lgpl-latest"
 # 设置启动盘符
 # 从软盘启动
 # boot: floppy
