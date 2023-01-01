@@ -251,6 +251,7 @@ bool inodeAddL1Block(struct Partition* part, struct Inode* inode, struct BlockIn
 }
 // 把L1对应的索引表读取到ioBuff中
 void inodeReadL1BlocksLBA(struct Partition* part, struct Inode* inode, void* ioBuff){
+    printkf("IRL1B: IOB VADDR:0x%8x\n", ioBuff);
     if(inode->blockTable[12] == 0) return;
     ideRead(part->disk, inode->blockTable[12], ioBuff, BLOCK_SIZE / SECTOR_SIZE);
 }
@@ -340,7 +341,8 @@ void inodeReadBlocks(struct Partition* part, struct Inode* inode, uint32* blockT
         tabeleIndex++;
     }
     if(inode->blockTable[12] == 0) return;
-    inodeReadL1BlocksLBA(part, inode, blockTableBuff + 12);
+    ideRead(part->disk, inode->blockTable[12], blockTableBuff + 12, BLOCK_SIZE / SECTOR_SIZE);
+    //inodeReadL1BlocksLBA(part, inode, blockTableBuff + 12);
     /*if(inode->blockTable[13] == 0) return;
     inodeReadL2BlocksLBA(part, inode, blockTableBuff + 12 + 128);
     if(inode->blockTable[14] == 0) return;

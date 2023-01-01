@@ -126,7 +126,6 @@ static void partitionFormat(struct Partition* part){
     inode->dataSize = sb.dirEntrySize * 2;  // 目录'.'和'..'
     inode->inodeNum = 0;    // 根目录占inode数组中的index为0
     inode->blockTable[0] = sb.dataStartLba;
-    printkf("SB_DSLBA=%d\n", inode->blockTable[0]);
     // 其余的blockPtr无需初始化，原因：memset中初始化为0，此时，剩余的blockPtr都为0
     ideWrite(disk, sb.inodeTableLba, buffer, sb.inodeTableSectorCnt);  
     // 5、将根目录写入到sb.dataStartLBA
@@ -369,7 +368,7 @@ int32 sysWrite(uint32 fd, const void* buffer, uint32 count){
     }
     uint32 gfd = fdLocal2Global(fd);
     struct File* writeFile = &fileTable[gfd];
-    if(writeFile->fdFlag & O_RDONLY || writeFile->fdFlag & O_RDWR){
+    if(writeFile->fdFlag & O_WRONLY || writeFile->fdFlag & O_RDWR){
         return fileWrite(writeFile, buffer, count);
     }else{
         consolePrint("FS_SYS_WRITE: not allowed to write file without flag O_RDWR or O_WRONLY\n");
@@ -393,6 +392,7 @@ int32 sysRead(uint32 fd, void* buffer, uint32 count){
         retVal = (readByteCnt == 0 ? -1 : (int32)readByteCnt);
     }else{
         uint32 gfd = fdLocal2Global(fd);
+        //printk("BFR\n");
         retVal = fileRead(&fileTable[gfd], buffer, count);
     }
     ASSERT(buffer != NULL);
@@ -699,6 +699,7 @@ char* sysGetCwd(char* buffer, uint32 size){
     if(childInodeNum == 0){
         buffer[0] = '/';
         buffer[1] = 0;
+        sys_free(ioBuffer);
         return buffer;
     }
     memset(buffer, 0, size);
@@ -760,15 +761,17 @@ int32 sysStat(const char* path, struct Status* buffer){
     int inodeNum = searchFile(path, &searchRecord);
     if(inodeNum != -1){
         struct Inode* objInode = inodeOpen(currentPart, inodeNum);
-        buffer->inodeNum = objInode->inodeNum;
         buffer->size = objInode->dataSize;
+        buffer->inodeNum = objInode->inodeNum;
         buffer->ctime = objInode->creatTime;
         buffer->mtime = objInode->modifyTime;
         buffer->fileType = searchRecord.fileType;
+        inodeClose(objInode);
         retVal = 0;
     }else{
         printkf("FS_SYS_STAT: '%s' not found!\n", path);
     }
     dirClose(searchRecord.parentDir);
+    //printk("STATUS END!!!\n");
     return retVal;
 }

@@ -1,7 +1,7 @@
 #ifndef FS_FS_H
 #define FS_FS_H
 #include "stdint.h"
-#define MAX_PATH_LEN            1024            // 路径长度
+#define MAX_PATH_LEN            512            // 路径长度
 #define MAX_FILE_NUM_PER_PART   4096            // 每个分区支持的最大文件数
 #define BITS_PER_SECTOR         4096            // 每个扇区的位数
 #define SECTOR_SIZE             512             // 每个扇区的大小

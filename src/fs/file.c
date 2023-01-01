@@ -253,6 +253,7 @@ int32 fileWrite(struct File* file, const void* buffer, uint32 count){
         file->fdInode->dataSize += chunkSize;
         writtenBytesCnt += chunkSize;
         leftBytesCnt -= chunkSize;
+        sectorIndex++;
     }
     inodeSync(currentPart, file->fdInode, ioBuff);
     sys_free(allBlocks);
@@ -275,6 +276,12 @@ FS_FO_ROLLBACK:
 }
 // 从file中读取count个字节写入buffer, 成功返回读取到的字节数，失败返回-1
 int32 fileRead(struct File* file, void* buffer, uint32 count){
+    printkf("FileInfo: INode=%d, BlockInfo:\n",file->fdInode->inodeNum);
+    int32 index = 0;
+    while(index < 13){
+        printkf("    index=%d, LBA=%d\n", index, file->fdInode->blockTable[index]);
+        index++;
+    }
     uint8* destBuff = buffer;
     uint32 size = count;
     uint32 leftSize = count;
@@ -292,17 +299,21 @@ int32 fileRead(struct File* file, void* buffer, uint32 count){
         return -1;
     }
     uint32* allBlocks = (uint32*)sys_malloc(140 * 4);
+    printkf("AB VADDR:0x%8x\n", (uint32)allBlocks);
     if(allBlocks == NULL){
         printk("FS_READ_FILE: malloc block LBA tabel failed!\n");
         return -1;
     }
     // 2、读取所有的block
-    uint32 blockIndex = 0;
-    while(blockIndex < 12){
-        allBlocks[blockIndex] = file->fdInode->blockTable[blockIndex];
+    int32 blockIndex = 0;
+    inodeReadBlocks(currentPart, file->fdInode, allBlocks);
+    while(blockIndex < 140){
+        if(allBlocks[blockIndex] != 0){
+            printkf("TIDX=%d, LBA=%d\n", blockIndex ,allBlocks[blockIndex]);
+        }
         blockIndex++;
     }
-    inodeReadL1BlocksLBA(currentPart, file->fdInode, allBlocks + 12);
+    blockIndex = 0;
     // 3、读取文件
     //uint32 readBlockCnt = readEndIndex - readStartIndex;
     uint32 chunkSize = 0;
@@ -312,6 +323,7 @@ int32 fileRead(struct File* file, void* buffer, uint32 count){
     uint32 sectorLBA = 0;
     while(bytesRead < size){
         blockIndex = file->fdPos / BLOCK_SIZE;
+        printkf("LBA=%d\n", allBlocks[blockIndex]);
         // 提示：出现为0时，可能需要重新设计FS
         ASSERT(allBlocks[blockIndex] != 0);
         sectorLBA = allBlocks[blockIndex];
