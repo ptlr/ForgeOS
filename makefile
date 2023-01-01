@@ -43,6 +43,7 @@ DIR_DEVICE = $(DIR_SRC)/device
 DIR_USER   = $(DIR_SRC)/user
 DIR_FS	   = $(DIR_SRC)/fs
 DIR_SHELL  = $(DIR_SRC)/shell
+DIR_COMMAND = $(DIR_SRC)/comman
 
 LOADER_SECTOR_CNT 	= 2
 # expr 后面的表达式运算符和操作数之间需要空格
@@ -56,7 +57,7 @@ OBJ_NAMES = kernel.o printk.a.o interrupt.a.o printk.c.o main.o interrupt.c.o\
 		thread.c.o list.c.o switch2.a.o sync.c.o console.c.o keyboard.c.o \
 		ioqueue.c.o tss.c.o process.c.o syscall.c.o syscall-init.c.o number.c.o \
 		format.c.o ide.c.o fs.c.o inode.c.o file.c.o dir.c.o block.c.o fork.c.o \
-		shell.c.o buildin-cmd.c.o
+		shell.c.o buildin-cmd.c.o exec.c.o assert.c.o
 
 BIN_NAMES = boot.bin loader.bin kernel.bin
 
@@ -114,6 +115,9 @@ $(DIR_BUILD)number.c.o:$(DIR_PUBLIC_LIB)/number.c $(DIR_INC)/*
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # format库
 $(DIR_BUILD)format.c.o:$(DIR_PUBLIC_LIB)/format.c $(DIR_INC)/*
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# 用户assert
+$(DIR_BUILD)assert.c.o : $(DIR_USER_LIB)/assert.c $(DIR_USER_LIB)/assert.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # 编译string库
 $(DIR_BUILD)string.c.o:$(DIR_PUBLIC_LIB)/string.c $(DIR_INC)/*
@@ -175,6 +179,9 @@ $(DIR_BUILD)shell.c.o : $(DIR_SHELL)/shell.c $(DIR_SHELL)/shell.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # buildinCmd
 $(DIR_BUILD)buildin-cmd.c.o : $(DIR_SHELL)/buildin-cmd.c $(DIR_SHELL)/buildin-cmd.h
+	$(CC) $(CFLAGS) $(INC) -o $@ $<
+# exec
+$(DIR_BUILD)exec.c.o : $(DIR_USER)/exec.c $(DIR_USER)/exec.h
 	$(CC) $(CFLAGS) $(INC) -o $@ $<
 # syscall
 $(DIR_BUILD)syscall.c.o : $(DIR_USER_LIB)/syscall.c $(DIR_USER_LIB)/syscall.h
