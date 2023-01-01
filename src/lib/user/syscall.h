@@ -25,6 +25,8 @@ enum SYSCALL_NR{
     SYS_REWINDDIR,
     SYS_STAT,
     SYS_PS,
+    SYS_EXEC,
+    SYS_SLEEP,
 };
 // 获取进程PID
 uint32 getpid(void);
@@ -68,4 +70,8 @@ int32 stat(const char* path, struct Status* status);
 int32 chdir(const char* path);
 // 显示任务列表
 void ps(void);
+// 运行程序
+int32 exec(const char* path, char* argv[]);
+// 以毫秒为单位休眠一段时间
+void sleep(uint32 timeMs);
 #endif

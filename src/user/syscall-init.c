@@ -6,6 +6,8 @@
 #include "console.h"
 #include "fs.h"
 #include "fork.h"
+#include "exec.h"
+#include "timer.h"
 
 #define SYSCALL_COUNT  32
 typedef void* syscall;
@@ -39,4 +41,6 @@ void syscallInit(int (* step)(void)){
     syscallTable[SYS_REWINDDIR] = sysRewinddir;
     syscallTable[SYS_STAT] = sysStat;
     syscallTable[SYS_PS] = sysPs;
+    syscallTable[SYS_EXEC] = sysExecv;
+    syscallTable[SYS_SLEEP] = msSleep;
 }

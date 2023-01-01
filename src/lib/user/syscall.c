@@ -130,3 +130,11 @@ int32 chdir(const char* path){
 void ps(void){
     _syscall0(SYS_PS);
 }
+// 运行程序
+int32 exec(const char* path, char* argv[]){
+    return _syscall2(SYS_EXEC, path, argv);
+}
+// 以毫秒为单位休眠一段时间
+void sleep(uint32 timeMs){
+    _syscall1(SYS_SLEEP, timeMs);
+}
