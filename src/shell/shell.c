@@ -1,13 +1,12 @@
 #include "shell.h"
 #include "stdio.h"
-#include "debug.h"
 #include "constant.h"
 #include "syscall.h"
-#include "fs.h"
-#include "file.h"
 #include "string.h"
-#include "syscall.h"
+#include "file.h"
 #include "buildin-cmd.h"
+#include "exec.h"
+#include "assert.h"
 
 #define MAX_ARG_NUM 16
 // 处理路径时的缓冲
@@ -25,7 +24,7 @@ void printPrompt(void){
 }
 // 从键盘缓冲区读取最多count个字符到buffer中
 static void readLine(char* buffer, int32 count){
-    ASSERT(buffer != NULL && count > 0);
+    assert(buffer != NULL && count > 0);
     char* pos = buffer;
     while (read(STD_IN, pos, 1) != -1 && (pos - buffer) < count)
     {
@@ -68,7 +67,7 @@ static void readLine(char* buffer, int32 count){
 }
 // 命令解析函数
 static int32 cmdParse(char* cmdStr, char** argv, char token){
-    ASSERT(cmdStr != NULL);
+    assert(cmdStr != NULL);
     int32 argIndex = 0;
     while(argIndex < MAX_ARG_NUM){
         argv[argIndex] = NULL;
@@ -128,7 +127,6 @@ void forgeShell(void){
         }else if(!strcmp("cd", argv[0])){
             if(NULL != buildinCd(argc, argv)){
                 memset(cwDCache, 0, MAX_PATH_LEN);
-                printf("FP:%s\n", finalPath);
                 strcpy(cwDCache, finalPath);
             }
         }else if(!strcmp("pwd", argv[0])){
@@ -142,7 +140,12 @@ void forgeShell(void){
         }else if(!strcmp("rm", argv[0])){
             buildinRm(argc, argv);
         }else{
-            printf("no such comman!\n");
+            printf("Extra cmd not support yet!\n");
+        }
+        int32 argIndex = 0;
+        while(argIndex < argc){
+            argv[argIndex] = NULL;
+            argIndex++;
         }
     }
 }
