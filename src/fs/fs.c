@@ -184,7 +184,7 @@ int searchFile(const char* pathName, struct PathSearchRecord* searchRecord){
         return 0;
     }
     uint32 pathLen = strlen(pathName);
-    ASSERT((pathName[0] == '/') && (pathLen > 1) && (pathLen < MAX_PATH_LEN));
+    //ASSERT((pathName[0] == '/') && (pathLen > 1) && (pathLen < MAX_PATH_LEN));
     char* subPath = (char*)pathName;
     struct Dir* parentDir = &rootDir;
     struct DirEntry dirEntry;
@@ -501,7 +501,7 @@ int32 sysMkdir(const char* pathName){
         // 没有找到时，出现两种状况，一、文件不存在，继续执行，二、中间某个路劲不存在，返回返回失败
         uint32 pathNameDepth = pathDepthCnt((char*)pathName);
         uint32 searchDepth = pathDepthCnt(searchRecord.searchPath);
-        printkf("PND=%d, SPD=%d\n", pathNameDepth, searchDepth);
+        //printkf("PND=%d, SPD=%d\n", pathNameDepth, searchDepth);
         if(pathNameDepth != searchDepth){
             printkf("FS_SYS_MKDIR: can't access '%s', not d directory, subpath '%s' is't exist\n", pathName, searchRecord.searchPath);
             rollbackStep = 1;

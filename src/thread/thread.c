@@ -218,7 +218,7 @@ static bool threadInfo(struct ListElem* elem, int arg){
         strcpy(status, "RUNNING");
         break;
         case TASK_READY:
-        strcpy(status, "READY");
+        strcpy(status, "READY  ");
         break;
         case TASK_BLOCKED:
         strcpy(status, "BLOCKED");
@@ -229,18 +229,18 @@ static bool threadInfo(struct ListElem* elem, int arg){
         case TASK_HANGING:
         strcpy(status, "HANGING");
         break;
-        strcpy(status, "DIED");
+        strcpy(status, "DIED   ");
         case TASK_DIED:
         break;
     }
     char buffer[128] = {0};
-    strformat(buffer, "%4d%16s%16s%16d%16s\n", thread->pid, ppid, status, thread->elapsedTicks, thread->name);
+    strformat(buffer, "%d%5s%5s%11d  %s\n", thread->pid, ppid, status, thread->elapsedTicks, thread->name);
     sysWrite(STD_OUT, buffer, strlen(buffer));
     return false;
 }
 // 输出进程信息
 void sysPs(void){
-    char* psTitle = "PID             PPID            STATUS          TICKS           COMMAND\n";
+    char* psTitle = "PID  PPID STATUS       TICKS  COMMAND\n";
     sysWrite(STD_OUT, psTitle, strlen(psTitle));
     listTraversal(&allThreadList, threadInfo, 0);
 }

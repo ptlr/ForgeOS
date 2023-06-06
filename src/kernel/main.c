@@ -48,8 +48,8 @@ void kernelMain(void)
 {
     printkf("\n\n\n\n%s", MSG_KERNEL);
     initKernel();
-    //copyProg();
     clear();
+    //copyProg();
     //printk("[ptlr@forge /]\n$ ");
     /*processExecute(uProcA, "UPA");
     processExecute(uProcB, "UPB");
@@ -67,13 +67,13 @@ void kernelMain(void)
 // 复制程序
 void copyProg(void){
     char* fileName = "/prog-no-arg";
-    uint32 fileSize = 14596;
+    uint32 fileSize = 14496;
     uint32 fileSecCnt = DIV_ROUND_UP(fileSize, 512);
     struct Disk* sda = &channels[0].devices[0];
     void* fileBuff = sys_malloc(fileSize);
     ideRead(sda, 300, fileBuff, fileSecCnt);
     uint8* buff = (uint8*)fileBuff;
-    //printkf("HEAD=%02x%02x%02x, CNT=%2d\n",buff[0],buff[1], buff[2], fileSecCnt);
+    printkf("HEAD=%02x%02x%02x, CNT=%2d\n",buff[0],buff[1], buff[2], fileSecCnt);
     int32 fd = sysOpen(fileName, O_CREAT | O_RDWR);
     if(fd != -1){
         if(sysWrite(fd, fileBuff, fileSize) == -1){

@@ -139,8 +139,10 @@ void forgeShell(void){
             buildinRmdir(argc, argv);
         }else if(!strcmp("rm", argv[0])){
             buildinRm(argc, argv);
+        }else if (!strcmp("help", argv[0])){
+            buildinHelp(argv, 1);
         }else{
-            printf("Extra cmd not support yet!\n");
+            buildinHelp(argv, 0);
         }
         int32 argIndex = 0;
         while(argIndex < argc){

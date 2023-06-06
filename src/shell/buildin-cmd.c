@@ -79,7 +79,7 @@ char* buildinCd(uint32 argc, char** argv){
         finalPath[1] = 0;
     }else{
         absPath(argv[1], finalPath);
-        printf("ABSP: %s\n",finalPath);
+        //printf("ABSP: %s\n",finalPath);
     }
     if(chdir(finalPath) == -1){
         printf("cd: no such direcotry %s\n", finalPath);
@@ -248,5 +248,26 @@ int buildinRm(uint32 argc, char** argv){
             printf("rm: delete file '%s' failed!\n", argv[1]);
         }
     }
+    return retVal;
+}
+// 帮助命令
+int buildinHelp(char** argv, int32 flag){
+    int32 retVal = -1;
+    if(!flag){
+        printf("'%s' is not a acceptable command, use:\n", argv[0]);
+    }
+    printf("command:\n");
+    printf("help   show available command and shortcut key\n");
+    printf("ls     list current directory files, options:\n       -l show details\n");
+    printf("clear  clean screen\n");
+    printf("cd     change current directorr\n");
+    printf("ps     show current threads\n");
+    printf("mkdir  create directory\n");
+    printf("rmdir  delete directory\n");
+    printf("rm     delete file\n");
+    printf("shortcut key:\n");
+    printf("CTRL + L clean screen\n");
+    printf("CTRL + U clean input\n");
+    retVal = 0;
     return retVal;
 }

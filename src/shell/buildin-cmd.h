@@ -20,4 +20,6 @@ int32 buildinMkdir(uint32 argc, char** argv);
 int buildinRmdir(uint32 argc, char** argv);
 // rm命令
 int buildinRm(uint32 argc, char** argv);
+// 帮助命令
+int buildinHelp(char** argv, int32 flag);
 #endif
